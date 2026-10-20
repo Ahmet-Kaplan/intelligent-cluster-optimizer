@@ -14,6 +14,7 @@ import (
 	"intelligent-cluster-optimizer/pkg/events"
 	"intelligent-cluster-optimizer/pkg/forecaster"
 	"intelligent-cluster-optimizer/pkg/gitops"
+	"intelligent-cluster-optimizer/pkg/leakdetector"
 	"intelligent-cluster-optimizer/pkg/metrics"
 	"intelligent-cluster-optimizer/pkg/models"
 	"intelligent-cluster-optimizer/pkg/pareto"
@@ -49,6 +50,7 @@ type Reconciler struct {
 	metricsStorage         *storage.InMemoryStorage
 	profileResolver        *profile.Resolver
 	anomalyChecker         *anomaly.WorkloadChecker
+	leakDetector           *leakdetector.Detector
 	workloadPredictor      *prediction.WorkloadPredictor
 	paretoHelper           *pareto.RecommendationHelper
 	gitopsExporter         gitops.Exporter
@@ -87,6 +89,7 @@ func NewReconciler(kubeClient kubernetes.Interface, eventRecorder record.EventRe
 		metricsStorage:         storage.NewStorage(),
 		profileResolver:        profile.NewResolver(),
 		anomalyChecker:         anomaly.NewWorkloadChecker(),
+		leakDetector:           leakdetector.NewDetector(),
 		workloadPredictor:      prediction.NewWorkloadPredictor(),
 		paretoHelper:           pareto.NewRecommendationHelper(),
 		gitopsExporter:         gitops.NewExporter(),
@@ -437,6 +440,20 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 				klog.V(4).Infof("[%s] Workload %s/%s has %d anomalies (severity: %s) - proceeding with caution",
 					mode, workloadRec.Namespace, workloadRec.WorkloadName, anomalyResult.AnomalyCount, anomalyResult.HighestSeverity)
 			}
+		}
+
+		// SAFETY CHECK: Block when a container's memory shows a sustained leak, so the optimizer does not
+		// mask the defect by resizing a broken container. Uses a longer window than the anomaly check
+		// because the detector needs more than one hour of samples to produce a verdict.
+		if leak := detectWorkloadLeak(r.leakDetector,
+			r.metricsStorage.GetMetricsByWorkload(workloadRec.Namespace, workloadRec.WorkloadName, leakWindow)); leak != nil {
+			klog.V(3).Infof("[%s] Skipping %s/%s: memory leak in %s/%s - %s",
+				mode, workloadRec.Namespace, workloadRec.WorkloadName, leak.Pod, leak.Container, leak.Analysis.Description)
+			r.optimizerEvents.RecordWarningEvent(config, events.ReasonMemoryLeakDetected,
+				fmt.Sprintf("Memory leak in %s/%s (pod %s, container %s): %s", workloadRec.Namespace,
+					workloadRec.WorkloadName, leak.Pod, leak.Container, leak.Analysis.Description))
+			skippedCount++
+			continue
 		}
 
 		// PREDICTION: Generate future resource usage predictions
