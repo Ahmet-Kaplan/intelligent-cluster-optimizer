@@ -82,3 +82,9 @@ func TestAdmit(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultConfigStaticForSmallBudgets(t *testing.T) {
+	if DefaultConfig(0.01).Eta != 0 || DefaultConfig(0.05).Eta != 0.005 {
+		t.Fatal("small budgets must use static calibration, eps >= 0.05 ACI")
+	}
+}

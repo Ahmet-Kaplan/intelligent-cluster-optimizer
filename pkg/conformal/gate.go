@@ -23,8 +23,14 @@ type Config struct {
 }
 
 // DefaultConfig returns the parameters of the offline evaluation (hourly decisions, 7 days of scores).
+// Below eps = 0.05 calibration is static: in the trace replay ACI exceeded eps = 0.01 for all envelopes but Holt-Winters
+// (too few calibrated decisions for its long-run correction), while static calibration stayed within it.
 func DefaultConfig(eps float64) Config {
-	return Config{Eps: eps, Eta: 0.005, Window: 168, Horizon: time.Hour}
+	eta := 0.005
+	if eps < 0.05 {
+		eta = 0
+	}
+	return Config{Eps: eps, Eta: eta, Window: 168, Horizon: time.Hour}
 }
 
 // MinCalibration is the smallest number of scores for which the (1 - eps) conformal quantile is finite.
