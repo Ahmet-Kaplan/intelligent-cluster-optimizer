@@ -12,7 +12,7 @@ spec:
   dryRun: false
   targetResources: [deployments]
   recommendations:
-    minSamples: 24          # 2 h at the 5-min reconcile cadence
+    minSamples: 24          # ~12 min at the observed 30-s reconcile cadence
     historyDuration: 24h
     memoryRiskBudget: 0.05
 ---

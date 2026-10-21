@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Live A/B run of the conformal admission gate on GKE.  Usage: run.sh up | status | collect | down
 set -euo pipefail
+export PATH="$(gcloud info --format='value(installation.sdk_root)')/bin:$PATH"  # gke-gcloud-auth-plugin
 PROJECT=${PROJECT:-project-82a946e9-425a-404f-acf}
 ZONE=${ZONE:-us-central1-a}
 CLUSTER=${CLUSTER:-ico-gate-ab}
@@ -44,13 +45,20 @@ up)
     gcloud artifacts repositories create optimizer --repository-format docker --location us-central1
   gcloud auth configure-docker us-central1-docker.pkg.dev -q
   docker buildx build --platform linux/amd64 -t "$IMAGE" --push "$ROOT"
-  # On-demand nodes and no auto-upgrade: the gate's calibration lives in controller memory,
+  # On-demand nodes and a no-upgrades exclusion: the gate's calibration lives in controller memory,
   # so a preemption or node upgrade mid-run would restart its cold start.
-  gcloud container clusters describe "$CLUSTER" --zone "$ZONE" >/dev/null 2>&1 ||
+  gcloud container clusters describe "$CLUSTER" --zone "$ZONE" >/dev/null 2>&1 || {
     gcloud container clusters create "$CLUSTER" --zone "$ZONE" --num-nodes 2 \
-      --machine-type e2-standard-4 --release-channel None --no-enable-autoupgrade \
-      --no-enable-autorepair --monitoring SYSTEM --logging SYSTEM,WORKLOAD
+      --machine-type e2-standard-4 --release-channel stable --monitoring SYSTEM --logging SYSTEM,WORKLOAD
+    gcloud container clusters update "$CLUSTER" --zone "$ZONE" \
+      --add-maintenance-exclusion-name ab-run --add-maintenance-exclusion-scope no_upgrades \
+      --add-maintenance-exclusion-start "$(date -u +%FT%TZ)" \
+      --add-maintenance-exclusion-end "$(date -u -v+4d +%FT%TZ)"
+  }
   gcloud container clusters get-credentials "$CLUSTER" --zone "$ZONE"
+  SA="$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')-compute@developer.gserviceaccount.com"
+  gcloud artifacts repositories add-iam-policy-binding optimizer --location us-central1 \
+    --member "serviceAccount:$SA" --role roles/artifactregistry.reader >/dev/null
   kubectl apply -f "$ROOT/config/crd/"
   kubectl kustomize "$ROOT/deploy" | sed "s#us-central1-docker.pkg.dev/k8s-resource-optimizer/optimizer/controller:latest#$IMAGE#" |
     perl -pe 's#^(\s+)- --api-addr=:8090#$1- --api-addr=:8090\n$1- --v=3#' | kubectl apply -f -
