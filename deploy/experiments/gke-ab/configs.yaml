@@ -1,0 +1,33 @@
+# Two arms, identical except for the risk budget: gate-on admits memory requests through the
+# conformal gate (eps_c = 0.05); gate-off applies the envelope recommendation directly.
+apiVersion: optimizer.cluster.io/v1alpha1
+kind: OptimizerConfig
+metadata:
+  name: gate-on
+  namespace: intelligent-optimizer-system
+spec:
+  enabled: true
+  targetNamespaces: [gate-on]
+  strategy: balanced
+  dryRun: false
+  targetResources: [deployments]
+  recommendations:
+    minSamples: 24          # 2 h at the 5-min reconcile cadence
+    historyDuration: 24h
+    memoryRiskBudget: 0.05
+---
+apiVersion: optimizer.cluster.io/v1alpha1
+kind: OptimizerConfig
+metadata:
+  name: gate-off
+  namespace: intelligent-optimizer-system
+spec:
+  enabled: true
+  targetNamespaces: [gate-off]
+  strategy: balanced
+  dryRun: false
+  targetResources: [deployments]
+  recommendations:
+    minSamples: 24
+    historyDuration: 24h
+    memoryRiskBudget: 0

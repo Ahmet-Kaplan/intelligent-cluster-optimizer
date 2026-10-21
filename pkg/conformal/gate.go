@@ -12,6 +12,8 @@ import (
 	"sort"
 	"sync"
 	"time"
+
+	"k8s.io/klog/v2"
 )
 
 // Config holds the gate parameters. Eps is the risk budget eps_c; Eta = 0 gives static split conformal.
@@ -82,6 +84,9 @@ func (g *Gate) Bound(cfg Config, key string, now time.Time, upper float64, peak 
 		}
 		st.open = nil
 		if y, ok := peak(d.at, d.at.Add(cfg.Horizon)); ok && !math.IsNaN(d.upper) {
+			// One line per scored decision: the live run's coverage is computed from these.
+			klog.V(2).InfoS("conformal decision scored", "key", key, "at", d.at.UTC().Format(time.RFC3339),
+				"peak", y, "upper", d.upper, "bound", d.bound, "alpha", st.alpha)
 			if !math.IsNaN(d.bound) { // any verdict incl. +/-Inf -> ACI step
 				miss := 0.0
 				if y > d.bound {

@@ -1,0 +1,38 @@
+# Memory workload mix for the live A/B run of the conformal admission gate.
+# Rendered once per arm: sed "s/__NS__/gate-on/" (and gate-off). Every pod holds memory with
+# stress-ng --vm-hang 0 (resident, ~0 CPU); the pattern restarts whenever the operator resizes the pod.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: __NS__
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mem-patterns
+  namespace: __NS__
+data:
+  # hold MB SECONDS: keep MB resident for SECONDS
+  lib.sh: |
+    hold() { stress-ng --vm 1 --vm-bytes "${1}M" --vm-hang 0 --timeout "${2}s" >/dev/null 2>&1; }
+  steady.sh: |
+    . /p/lib.sh; while true; do hold 300 3600; done
+  cycle-1h.sh: |
+    . /p/lib.sh; while true; do hold 150 1800; hold 450 1800; done
+  cycle-6h.sh: |
+    . /p/lib.sh
+    while true; do
+      for mb in 100 180 260 340 420 500 420 340 260 180 100 100; do hold $mb 1800; done
+    done
+  spike.sh: |
+    . /p/lib.sh
+    while true; do
+      if [ $((RANDOM % 4)) -eq 0 ]; then hold 200 1200; hold 600 600; else hold 200 1800; fi
+    done
+  regime.sh: |
+    . /p/lib.sh; while true; do hold 200 28800; hold 450 28800; done
+  leak-reset.sh: |
+    . /p/lib.sh
+    while true; do mb=100; while [ $mb -le 600 ]; do hold $mb 600; mb=$((mb + 20)); done; done
+  noisy.sh: |
+    . /p/lib.sh; while true; do hold $((150 + RANDOM % 301)) 600; done
