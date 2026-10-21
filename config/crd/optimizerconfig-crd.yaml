@@ -180,6 +180,11 @@ spec:
                       minimum: 1.0
                       maximum: 3.0
                       default: 1.2
+                    memoryRiskBudget:
+                      type: number
+                      description: Conformal admission gate risk budget eps_c (0 disables)
+                      minimum: 0
+                      maximum: 0.5
                     historyDuration:
                       type: string
                       description: How far back to look for metrics (e.g., 24h, 7d)

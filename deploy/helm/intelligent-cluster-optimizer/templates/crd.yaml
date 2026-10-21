@@ -126,6 +126,10 @@ spec:
                     minimum: 1.0
                     maximum: 3.0
                     default: 1.2
+                  memoryRiskBudget:
+                    type: number
+                    minimum: 0
+                    maximum: 0.5
                   historyDuration:
                     type: string
                     default: "24h"

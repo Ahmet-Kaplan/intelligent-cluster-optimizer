@@ -282,6 +282,14 @@ type RecommendationConfig struct {
 	// +optional
 	// +kubebuilder:default="24h"
 	HistoryDuration string `json:"historyDuration,omitempty"`
+
+	// MemoryRiskBudget is the conformal admission gate's risk budget eps_c: the long-run fraction of
+	// hourly decisions whose peak memory may exceed the request. A candidate below the calibrated
+	// bound is raised to it. 0 disables the gate.
+	// +optional
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=0.5
+	MemoryRiskBudget float64 `json:"memoryRiskBudget,omitempty"`
 }
 
 // UpdateStrategy defines how updates are applied

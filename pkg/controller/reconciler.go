@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"math"
 	"sort"
 	"sync"
 	"time"
@@ -11,6 +12,7 @@ import (
 	optimizerv1alpha1 "intelligent-cluster-optimizer/pkg/apis/optimizer/v1alpha1"
 	"intelligent-cluster-optimizer/pkg/apiserver"
 	"intelligent-cluster-optimizer/pkg/applier"
+	"intelligent-cluster-optimizer/pkg/conformal"
 	"intelligent-cluster-optimizer/pkg/events"
 	"intelligent-cluster-optimizer/pkg/forecaster"
 	"intelligent-cluster-optimizer/pkg/gitops"
@@ -51,6 +53,7 @@ type Reconciler struct {
 	profileResolver        *profile.Resolver
 	anomalyChecker         *anomaly.WorkloadChecker
 	leakDetector           *leakdetector.Detector
+	admissionGate          *conformal.Gate
 	workloadPredictor      *prediction.WorkloadPredictor
 	paretoHelper           *pareto.RecommendationHelper
 	gitopsExporter         gitops.Exporter
@@ -90,6 +93,7 @@ func NewReconciler(kubeClient kubernetes.Interface, eventRecorder record.EventRe
 		profileResolver:        profile.NewResolver(),
 		anomalyChecker:         anomaly.NewWorkloadChecker(),
 		leakDetector:           leakdetector.NewDetector(),
+		admissionGate:          conformal.NewGate(),
 		workloadPredictor:      prediction.NewWorkloadPredictor(),
 		paretoHelper:           pareto.NewRecommendationHelper(),
 		gitopsExporter:         gitops.NewExporter(),
@@ -628,6 +632,30 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 		}
 
 		for _, containerRec := range workloadRec.Containers {
+			// CONFORMAL ADMISSION: the memory request must cover the calibrated bound on the next-hour peak,
+			// so peaks exceed the request in at most a fraction eps_c of decisions over the long run.
+			// The candidate is the envelope being calibrated; a cold-start decision needs human approval.
+			coldStart := false
+			if eps := memoryRiskBudget(config); eps > 0 {
+				key := fmt.Sprintf("%s/%s/%s/%s", workloadRec.Namespace, workloadRec.WorkloadKind,
+					workloadRec.WorkloadName, containerRec.ContainerName)
+				candidate := float64(containerRec.RecommendedMemory)
+				bound := r.admissionGate.Bound(conformal.DefaultConfig(eps), key, time.Now(), candidate,
+					workloadContainerPeak(r.metricsStorage, workloadRec.Namespace, workloadRec.WorkloadName, containerRec.ContainerName))
+				req, verdict := conformal.Admit(candidate, float64(containerRec.CurrentMemory), bound)
+				switch verdict {
+				case conformal.Raised, conformal.Held:
+					containerRec.RecommendedMemory = int64(math.Ceil(req))
+					klog.V(3).Infof("[%s] Risk budget %.3f raised memory for %s: %d -> %d (bound %.0f)",
+						mode, eps, key, int64(candidate), containerRec.RecommendedMemory, bound)
+					r.optimizerEvents.RecordNormalEvent(config, events.ReasonRiskBudgetEnforced,
+						fmt.Sprintf("Memory request for %s raised to %s to meet risk budget %.3f",
+							key, formatMemory(containerRec.RecommendedMemory), eps))
+				case conformal.NeedsApproval:
+					coldStart = true
+				}
+			}
+
 			// Cap recommendations to the existing resource limits so we never
 			// set request > limit (which Kubernetes rejects).
 			if containerRec.RecommendedCPU > containerRec.LimitCPU && containerRec.LimitCPU > 0 {
@@ -707,6 +735,17 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 				}
 			}
 
+			// Cold start: no calibrated verdict yet, so a live change waits for human approval.
+			if coldStart && !config.Spec.DryRun {
+				klog.V(3).Infof("[LIVE] Queueing %s/%s/%s for approval: conformal gate in cold start",
+					rec.Namespace, rec.WorkloadName, rec.ContainerName)
+				if r.dryRunQueue != nil {
+					r.dryRunQueue.Add(dryRunDecision(rec, containerRec, "ConformalColdStart"))
+				}
+				skippedCount++
+				continue
+			}
+
 			applyResult, err := r.applier.Apply(ctx, rec, config.Spec.DryRun)
 			if err != nil {
 				klog.Warningf("[%s] Failed to apply recommendation for %s/%s/%s: %v",
@@ -721,24 +760,7 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 					klog.V(3).Infof("[DRY-RUN]   - %s", change)
 				}
 				if r.dryRunQueue != nil && len(applyResult.Changes) > 0 {
-					d := apiserver.DryRunDecision{
-						ScalingType:       "vertical",
-						Namespace:         rec.Namespace,
-						DeploymentName:    rec.WorkloadName,
-						ContainerName:     rec.ContainerName,
-						WorkloadKind:      rec.WorkloadKind,
-						CurrentCPU:        rec.CurrentCPU,
-						RecommendedCPU:    rec.RecommendedCPU,
-						CurrentMemory:     rec.CurrentMemory,
-						RecommendedMemory: rec.RecommendedMemory,
-						Confidence:        containerRec.Confidence,
-						Reason:            "HoltWinters",
-					}
-					if containerRec.EstimatedSavings != nil {
-						d.SavingsPerHour = containerRec.EstimatedSavings.TotalSavingsPerHour
-						d.SavingsPerMonth = containerRec.EstimatedSavings.SavingsPerMonth
-					}
-					r.dryRunQueue.Add(d)
+					r.dryRunQueue.Add(dryRunDecision(rec, containerRec, "HoltWinters"))
 				}
 			} else if applyResult.Applied {
 				appliedCount++
@@ -1014,4 +1036,26 @@ func (r *Reconciler) checkSystemHealth(config *optimizerv1alpha1.OptimizerConfig
 		Score:     100.0,
 		Message:   "SLA monitoring active - using default healthy state",
 	}, nil
+}
+
+// dryRunDecision builds the approval-queue entry for a vertical recommendation.
+func dryRunDecision(rec *applier.ResourceRecommendation, c recommendation.ContainerRecommendation, reason string) apiserver.DryRunDecision {
+	d := apiserver.DryRunDecision{
+		ScalingType:       "vertical",
+		Namespace:         rec.Namespace,
+		DeploymentName:    rec.WorkloadName,
+		ContainerName:     rec.ContainerName,
+		WorkloadKind:      rec.WorkloadKind,
+		CurrentCPU:        rec.CurrentCPU,
+		RecommendedCPU:    rec.RecommendedCPU,
+		CurrentMemory:     rec.CurrentMemory,
+		RecommendedMemory: rec.RecommendedMemory,
+		Confidence:        c.Confidence,
+		Reason:            reason,
+	}
+	if c.EstimatedSavings != nil {
+		d.SavingsPerHour = c.EstimatedSavings.TotalSavingsPerHour
+		d.SavingsPerMonth = c.EstimatedSavings.SavingsPerMonth
+	}
+	return d
 }
