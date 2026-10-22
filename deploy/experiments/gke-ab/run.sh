@@ -74,6 +74,14 @@ status)
 collect)
   mkdir -p "$OUT"
   kubectl -n intelligent-optimizer-system logs deploy/intelligent-optimizer-controller > "$OUT/controller.log"
+  # kubectl logs only holds the current rotated file; Cloud Logging keeps the whole run.
+  gcloud logging read "resource.type=\"k8s_container\" AND resource.labels.cluster_name=\"$CLUSTER\" AND resource.labels.container_name=\"controller\" AND jsonPayload.message:(\"conformal decision scored\" OR \"Risk budget\" OR \"cold start\" OR \"Recommendation for\")" \
+    --freshness=4d --limit=200000 --format=json > "$OUT/controller-gate.json"
+  # 60-s ground truth for both arms: container memory used and requested.
+  for m in memory/used_bytes memory/request_bytes restart_count; do
+    python3 "$HERE/export_metrics.py" "$PROJECT" "$CLUSTER" "$(cat "$HERE/started_at")" "$m" "$OUT/${m//\//_}.json" ||
+      echo "monitoring export failed for $m"
+  done
   kubectl -n intelligent-optimizer-system get events -o json > "$OUT/events.json"
   for ns in gate-on gate-off; do kubectl -n $ns get pods,events -o json > "$OUT/$ns.json"; done
   echo "$IMAGE" > "$OUT/image.txt"; cp "$HERE/started_at" "$OUT/"; echo "collected to $OUT";;
