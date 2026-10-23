@@ -431,7 +431,7 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 
 		// SAFETY CHECK: Check for anomalies in workload metrics before scaling
 		workloadMetrics := r.metricsStorage.GetMetricsByWorkload(workloadRec.Namespace, workloadRec.WorkloadName, 1*time.Hour)
-		if len(workloadMetrics) > 0 {
+		if len(workloadMetrics) > 0 && !config.Spec.DisableAnomalyGate {
 			anomalyResult := r.anomalyChecker.CheckWorkload(workloadRec.Namespace, workloadRec.WorkloadName, workloadMetrics)
 			if anomalyResult.ShouldBlockScaling {
 				klog.V(3).Infof("[%s] Skipping %s/%s: anomaly detected - %s (action: %s)",
@@ -450,7 +450,7 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 		// mask the defect by resizing a broken container. Uses a longer window than the anomaly check
 		// because the detector needs more than one hour of samples to produce a verdict.
 		if leak := detectWorkloadLeak(r.leakDetector,
-			r.metricsStorage.GetMetricsByWorkload(workloadRec.Namespace, workloadRec.WorkloadName, leakWindow)); leak != nil {
+			r.metricsStorage.GetMetricsByWorkload(workloadRec.Namespace, workloadRec.WorkloadName, leakWindow)); leak != nil && !config.Spec.DisableLeakGate {
 			klog.V(3).Infof("[%s] Skipping %s/%s: memory leak in %s/%s - %s",
 				mode, workloadRec.Namespace, workloadRec.WorkloadName, leak.Pod, leak.Container, leak.Analysis.Description)
 			r.optimizerEvents.RecordWarningEvent(config, events.ReasonMemoryLeakDetected,
@@ -635,7 +635,7 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 			// CONFORMAL ADMISSION: the memory request must cover the calibrated bound on the next-hour peak,
 			// so peaks exceed the request in at most a fraction eps_c of decisions over the long run.
 			// The candidate is the envelope being calibrated; a cold-start decision needs human approval.
-			coldStart := false
+			coldStart, gateRaised := false, false
 			if eps := memoryRiskBudget(config); eps > 0 {
 				key := fmt.Sprintf("%s/%s/%s/%s", workloadRec.Namespace, workloadRec.WorkloadKind,
 					workloadRec.WorkloadName, containerRec.ContainerName)
@@ -646,6 +646,7 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 				switch verdict {
 				case conformal.Raised, conformal.Held:
 					containerRec.RecommendedMemory = int64(math.Ceil(req))
+					gateRaised = true
 					klog.V(3).Infof("[%s] Risk budget %.3f raised memory for %s: %d -> %d (bound %.0f)",
 						mode, eps, key, int64(candidate), containerRec.RecommendedMemory, bound)
 					r.optimizerEvents.RecordNormalEvent(config, events.ReasonRiskBudgetEnforced,
@@ -665,6 +666,12 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 				containerRec.RecommendedCPU = containerRec.LimitCPU
 			}
 			if containerRec.RecommendedMemory > containerRec.LimitMemory && containerRec.LimitMemory > 0 {
+				if gateRaised { // the request cannot reach the bound, so this decision carries no guarantee
+					r.optimizerEvents.RecordWarningEvent(config, events.ReasonRiskBudgetUncertified,
+						fmt.Sprintf("Bound for %s/%s/%s exceeds the memory limit %s; request capped, risk budget not certified",
+							workloadRec.Namespace, workloadRec.WorkloadName, containerRec.ContainerName,
+							formatMemory(containerRec.LimitMemory)))
+				}
 				klog.V(3).Infof("[%s] Capping recommended Memory for %s/%s/%s: %d -> %d (limit)",
 					mode, workloadRec.Namespace, workloadRec.WorkloadName, containerRec.ContainerName,
 					containerRec.RecommendedMemory, containerRec.LimitMemory)
@@ -686,7 +693,8 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 			// Skip if no changes needed.
 			// In dry-run mode we bypass the 5% minimum-change threshold so that
 			// all candidates are queued for user review, even small adjustments.
-			if !config.Spec.DryRun && !rec.HasChanges() {
+			belowBound := gateRaised && containerRec.CurrentMemory < containerRec.RecommendedMemory
+			if !config.Spec.DryRun && !rec.HasChanges() && !belowBound {
 				klog.V(3).Infof("[%s] Skipping %s/%s/%s: no changes needed (current CPU=%s recommended CPU=%s, current mem=%s recommended mem=%s)",
 					mode, rec.Namespace, rec.WorkloadName, rec.ContainerName,
 					rec.CurrentCPU, rec.RecommendedCPU, rec.CurrentMemory, rec.RecommendedMemory)
@@ -695,7 +703,8 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 			}
 
 			// SAFETY CHECK: Enforce MaxChangePercent limit (skip in dry-run — queue all candidates)
-			if resolvedSettings != nil && !config.Spec.DryRun {
+			// A raise to the gate's bound is itself the safety action, so the change-size limits do not apply.
+			if resolvedSettings != nil && !config.Spec.DryRun && !belowBound {
 				changePercent := containerRec.MaxChangePercent()
 				shouldApply, reason := resolvedSettings.ShouldApplyRecommendation(containerRec.Confidence, changePercent)
 				if !shouldApply {

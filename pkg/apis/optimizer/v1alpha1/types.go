@@ -58,6 +58,13 @@ type OptimizerConfigSpec struct {
 	// +kubebuilder:default=false
 	DryRun bool `json:"dryRun"`
 
+	// DisableAnomalyGate and DisableLeakGate switch off the two vetoing safety layers, for controlled
+	// experiments that isolate the conformal admission gate. Not intended for production.
+	// +optional
+	DisableAnomalyGate bool `json:"disableAnomalyGate,omitempty"`
+	// +optional
+	DisableLeakGate bool `json:"disableLeakGate,omitempty"`
+
 	// MaintenanceWindows defines when updates are allowed to be applied
 	// +optional
 	MaintenanceWindows []MaintenanceWindow `json:"maintenanceWindows,omitempty"`

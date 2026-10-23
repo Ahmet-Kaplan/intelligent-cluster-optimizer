@@ -95,6 +95,13 @@ spec:
                   description: If true, only log recommendations without applying changes
                   default: false
 
+                disableAnomalyGate:
+                  type: boolean
+                  description: Switch off the anomaly veto (controlled experiments only)
+                disableLeakGate:
+                  type: boolean
+                  description: Switch off the memory-leak veto (controlled experiments only)
+
                 maintenanceWindows:
                   type: array
                   description: Maintenance windows during which updates are allowed

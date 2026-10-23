@@ -1,7 +1,9 @@
 package conformal
 
 import (
+	"encoding/json"
 	"math"
+	"os"
 	"testing"
 	"time"
 )
@@ -34,6 +36,41 @@ func TestBoundMatchesPython(t *testing.T) {
 		got := g.Bound(cfg, "c", t0.Add(time.Duration(k)*time.Hour), upper(k), peak)
 		same := (math.IsNaN(want) && math.IsNaN(got)) || got == want || math.Abs(got-want) < 1e-9
 		if !same {
+			t.Fatalf("decision %d: bound %v, python %v", k, got, want)
+		}
+	}
+}
+
+// TestBoundMatchesPythonDeployed replays the deployed configuration (eps 0.05, eta 0.005, window 168) on a
+// noisy series with spikes; testdata/deployed_config.json is written by aci_bounds in conformal.py.
+func TestBoundMatchesPythonDeployed(t *testing.T) {
+	raw, err := os.ReadFile("testdata/deployed_config.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fx struct {
+		Eps, Eta float64
+		Window   int
+		Upper, Y []float64
+		Bounds   []any
+	}
+	if err := json.Unmarshal(raw, &fx); err != nil {
+		t.Fatal(err)
+	}
+	cfg := Config{Eps: fx.Eps, Eta: fx.Eta, Window: fx.Window, Horizon: time.Hour}
+	t0 := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	peak := func(from, _ time.Time) (float64, bool) { return fx.Y[int(from.Sub(t0)/time.Hour)], true }
+	g := NewGate()
+	for k, w := range fx.Bounds {
+		want := math.NaN()
+		switch v := w.(type) {
+		case float64:
+			want = v
+		case string:
+			want = map[string]float64{"+Inf": math.Inf(1), "-Inf": math.Inf(-1)}[v]
+		}
+		got := g.Bound(cfg, "c", t0.Add(time.Duration(k)*time.Hour), fx.Upper[k], peak)
+		if !((math.IsNaN(want) && math.IsNaN(got)) || got == want || math.Abs(got-want) < 1e-9) {
 			t.Fatalf("decision %d: bound %v, python %v", k, got, want)
 		}
 	}

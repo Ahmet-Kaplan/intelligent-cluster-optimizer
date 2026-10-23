@@ -23,6 +23,7 @@ const (
 	ReasonAnomalyDetected          = "AnomalyDetected"
 	ReasonMemoryLeakDetected       = "MemoryLeakDetected"
 	ReasonRiskBudgetEnforced       = "RiskBudgetEnforced"
+	ReasonRiskBudgetUncertified    = "RiskBudgetUncertified"
 	ReasonPeakLoadPredicted        = "PeakLoadPredicted"
 	ReasonGitOpsExportSucceeded    = "GitOpsExportSucceeded"
 	ReasonGitOpsExportFailed       = "GitOpsExportFailed"
