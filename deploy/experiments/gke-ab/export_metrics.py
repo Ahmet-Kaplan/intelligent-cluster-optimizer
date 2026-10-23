@@ -1,6 +1,7 @@
 """Export GKE container metrics for the gate-* namespaces (Cloud Monitoring REST, paginated).
 
-Usage: export_metrics.py PROJECT CLUSTER START_RFC3339 METRIC OUT.json   (METRIC e.g. memory/used_bytes)
+Usage: export_metrics.py PROJECT CLUSTER START_RFC3339 METRIC OUT.json [--ns-prefix PREFIX]
+(METRIC e.g. memory/used_bytes; PREFIX defaults to "gate-")
 """
 import json
 import subprocess
@@ -10,10 +11,11 @@ import urllib.request
 from datetime import datetime, timezone
 
 project, cluster, start, metric, out = sys.argv[1:6]
+prefix = sys.argv[7] if len(sys.argv) > 7 and sys.argv[6] == "--ns-prefix" else "gate-"
 token = subprocess.check_output(["gcloud", "auth", "print-access-token"], text=True).strip()
 params = {
     "filter": (f'metric.type="kubernetes.io/container/{metric}" AND resource.labels.cluster_name="{cluster}"'
-               ' AND resource.labels.namespace_name=starts_with("gate-")'),
+               f' AND resource.labels.namespace_name=starts_with("{prefix}")'),
     "interval.startTime": start,
     "interval.endTime": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
 }
