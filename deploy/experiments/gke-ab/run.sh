@@ -2,7 +2,7 @@
 # Live A/B run of the conformal admission gate on GKE.  Usage: run.sh up | status | collect | down
 set -euo pipefail
 export PATH="$(gcloud info --format='value(installation.sdk_root)')/bin:$PATH"  # gke-gcloud-auth-plugin
-PROJECT=${PROJECT:-project-82a946e9-425a-404f-acf}
+PROJECT=${PROJECT:?set PROJECT to your GCP project id}
 ZONE=${ZONE:-us-central1-a}
 CLUSTER=${CLUSTER:-ico-gate-ab}
 REPO=us-central1-docker.pkg.dev/$PROJECT/optimizer
