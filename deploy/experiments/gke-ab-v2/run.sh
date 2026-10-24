@@ -104,9 +104,10 @@ status)
   kubectl get vpa -n ab-vpa --no-headers | head -3;;
 collect)
   mkdir -p "$OUT"
-  # The full controller log (every veto, raise and scored decision) is kept in Cloud Logging.
-  gcloud logging read "resource.type=\"k8s_container\" AND resource.labels.cluster_name=\"$CLUSTER\" AND resource.labels.container_name=\"controller\"" \
-    --freshness=6d --limit=2000000 --format=json > "$OUT/controller-full.json"
+  # Cloud Logging keeps the whole controller log; export the lines the analysis uses (scored decisions, raises,
+  # cold-start queueing, uncertified bounds, skips and applied recommendations).
+  gcloud logging read "resource.type=\"k8s_container\" AND resource.labels.cluster_name=\"$CLUSTER\" AND resource.labels.container_name=\"controller\" AND jsonPayload.message:(\"conformal decision scored\" OR \"Risk budget\" OR \"cold start\" OR \"Skipping\" OR \"Recommendation for\" OR \"exceeds the memory limit\")" \
+    --freshness=6d --limit=3000000 --format=json > "$OUT/controller-full.json"
   for m in memory/used_bytes memory/request_bytes restart_count; do
     python3 "$ROOT/deploy/experiments/gke-ab/export_metrics.py" "$PROJECT" "$CLUSTER" "$(cat "$HERE/started_at")" "$m" \
       "$OUT/${m//\//_}.json" --ns-prefix ab- || echo "monitoring export failed for $m"
