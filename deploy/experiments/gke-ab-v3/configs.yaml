@@ -1,0 +1,38 @@
+# Three operator-managed arms, identical except for the admission rule. The leak and anomaly vetoes are off in
+# all of them so that the arms differ only in how the memory request is chosen. ab-vpa is managed by GKE's VPA.
+apiVersion: optimizer.cluster.io/v1alpha1
+kind: OptimizerConfig
+metadata: {name: ab-gate, namespace: intelligent-optimizer-system}
+spec:
+  enabled: true
+  targetNamespaces: [ab-gate]
+  strategy: balanced
+  dryRun: false
+  disableAnomalyGate: true
+  disableLeakGate: true
+  recommendations: {minSamples: 24, historyDuration: 24h, memoryRiskBudget: 0.05}
+---
+apiVersion: optimizer.cluster.io/v1alpha1
+kind: OptimizerConfig
+metadata: {name: ab-nogate, namespace: intelligent-optimizer-system}
+spec:
+  enabled: true
+  targetNamespaces: [ab-nogate]
+  strategy: balanced
+  dryRun: false
+  disableAnomalyGate: true
+  disableLeakGate: true
+  recommendations: {minSamples: 24, historyDuration: 24h, memoryRiskBudget: 0}
+---
+# No gate, margin raised from 1.2 to 1.65 so that its memory is close to the gate's in the v1 run (706/510 x 1.2).
+apiVersion: optimizer.cluster.io/v1alpha1
+kind: OptimizerConfig
+metadata: {name: ab-margin, namespace: intelligent-optimizer-system}
+spec:
+  enabled: true
+  targetNamespaces: [ab-margin]
+  strategy: balanced
+  dryRun: false
+  disableAnomalyGate: true
+  disableLeakGate: true
+  recommendations: {minSamples: 24, historyDuration: 24h, memoryRiskBudget: 0, safetyMargin: 1.65}

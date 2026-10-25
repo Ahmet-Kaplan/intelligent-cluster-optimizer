@@ -57,3 +57,6 @@ The v1 run (deploy/experiments/gke-ab) had five design flaws found in review:
   Exposure differences across arms caused by the outage are reported.
 - 2026-10-25, same note: the run is extended by 24 h (teardown 2026-10-27T21:51Z) so that segment 2 has about 39
   calibrated hours.
+- 2026-10-25T12:52Z: the root cause of the OOM was found in the controller (the metrics store was never
+  garbage-collected). The authors stopped v2 and moved the confirmatory test to v3 (deploy/experiments/gke-ab-v3),
+  which uses the fixed controller. Segment 1 of v2 is reported as exploratory; segment 2 was not run.
