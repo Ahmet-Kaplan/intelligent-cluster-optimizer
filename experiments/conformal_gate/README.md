@@ -15,7 +15,7 @@ live GKE experiments are in `deploy/experiments/gke-ab` (v1) and `deploy/experim
 - `results/`: every table in the paper, with a header naming the command and code version that produced it.
 
 ## Reproduce
-1. `uv sync` (Python 3.13). Foundation-model forecasts need a GPU and the optional model packages in `pyproject.toml`.
+1. `uv sync` (Python >= 3.12). Foundation-model forecasts need a GPU and the optional model packages in `pyproject.toml`.
 2. `bash scripts/run_alibaba.sh` downloads the public Alibaba cluster-trace v2018
    (https://github.com/alibaba/clusterdata) and prepares 300 containers with five injection seeds (~34 min).
 3. `bash scripts/run_panel.sh`, then `scripts/run_revision.sh`, then `scripts/run_revision4.sh` regenerate the results.
