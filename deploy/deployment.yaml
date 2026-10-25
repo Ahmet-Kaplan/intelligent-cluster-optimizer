@@ -69,7 +69,7 @@ spec:
             memory: 128Mi
           limits:
             cpu: 500m
-            memory: 512Mi
+            memory: 2Gi  # 512Mi was OOM-killed while restoring a 30-h history of ~90 workloads
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true

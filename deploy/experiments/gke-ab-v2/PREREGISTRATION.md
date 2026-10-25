@@ -44,4 +44,14 @@ The v1 run (deploy/experiments/gke-ab) had five design flaws found in review:
 - **Reporting:** all four arms and all 21 workloads go in a per-workload table, whatever the result.
 
 ## Changes after launch
-(none)
+- 2026-10-25, recorded before any outcome was looked at. The controller (memory limit 512Mi) was OOM-killed from
+  2026-10-25T07:45Z onwards: 29 crash-restarts by 11:06Z, apparently while it restored its metrics history at
+  start-up. Each restart erased the gate's in-memory calibration, and the three operator arms were not resized
+  while the controller was down; the VPA arm was unaffected. At 11:12Z the memory limit was raised to 2Gi (request
+  512Mi) and the controller has run without restarts since.
+  The analysis therefore uses two segments, each analysed as specified above:
+  - **Segment 1 (primary):** from launch (2026-10-23T21:51Z) to the first OOM (2026-10-25T07:45Z), about 34 h.
+  - **Segment 2:** from the fix (2026-10-25T11:12Z) to the end of the run. The gate arm restarts its cold start
+    here, so this is an independent replication with its own calibrated window.
+  - Hours between 07:45Z and 11:12Z are excluded.
+  Exposure differences across arms caused by the outage are reported.
