@@ -1,0 +1,29 @@
+## Slack at matched violation for low targets (family: viol=0.0005, viol=0.001, viol=0.002, viol=0.005, viol=0.01, viol=0.02, viol=0.05)
+| conformal_modify_chronos2 | -- | -- | -- | -- | -- | -- | -- |
+| conformal_modify_lgbm | -- | -- | 0.1760 | -- | -- | -- | -- |
+| conformal_modify_toto2_313m | -- | -- | -- | -- | -- | -- | -- |
+| conformal_size_chronos2 | -- | -- | -- | 0.1368 | 0.1055 | 0.0773 | 0.0363 |
+| conformal_size_lgbm | -- | -- | -- | 0.1363 | 0.0996 | 0.0735 | 0.0355 |
+| conformal_size_toto2_313m | -- | -- | -- | 0.1402 | 0.1052 | 0.0764 | 0.0299 |
+| error_padding_candidate | -- | -- | 0.1771 | -- | -- | -- | -- |
+| error_padding_chronos2 | -- | -- | -- | -- | -- | 0.0526 | 0.0383 |
+| error_padding_lgbm | -- | -- | -- | -- | -- | 0.0517 | 0.0374 |
+| error_padding_toto2_313m | -- | -- | -- | -- | -- | 0.0497 | 0.0292 |
+| fixed_headroom | 0.3742 | 0.2666 | 0.2411 | 0.1670 | 0.1614 | 0.1501 | 0.1164 |
+| ico_margin | 0.3504 | 0.2996 | 0.2257 | 0.1564 | 0.1075 | 0.0960 | 0.0855 |
+| vpa_percentile | 0.2037 | 0.1917 | 0.1843 | 0.1729 | 0.1608 | 0.1510 | -- |
+| vpa_updater | 0.1930 | -- | -- | -- | -- | -- | -- |
+
+## Paired differences, a - b (mean [95% paired bootstrap CI]; share of resamples < 0)
+| a - b | viol=0.0005 | viol=0.001 | viol=0.002 | viol=0.005 | viol=0.01 | viol=0.02 | viol=0.05 |
+| conformal_size_lgbm - error_padding_lgbm | -- | -- | -- | -- | -- | +0.0218 [+0.0182, +0.0246]; 0.000 | -0.0018 [-0.0037, -0.0001]; 0.982 |
+| conformal_size_chronos2 - error_padding_chronos2 | -- | -- | -- | -- | -- | +0.0247 [+0.0214, +0.0284]; 0.000 | -0.0021 [-0.0036, +0.0005]; 0.948 |
+| conformal_size_toto2_313m - error_padding_toto2_313m | -- | -- | -- | -- | -- | +0.0267 [+0.0209, +0.0319]; 0.000 | +0.0007 [-0.0023, +0.0062]; 0.276 |
+| conformal_modify_lgbm - error_padding_candidate | -- | -- | -0.0012 [-0.0048, +0.0000]; 0.972 | -- | -- | -- | -- |
+| conformal_modify_lgbm - vpa_updater | -- | -- | -- | -- | -- | -- | -- |
+| conformal_modify_lgbm - ico_margin | -- | -- | -0.0498 [-0.0931, -0.0220]; 1.000 | -- | -- | -- | -- |
+| conformal_size_lgbm - ico_margin | -- | -- | -- | -0.0201 [-0.0302, +0.0090]; 0.951 | -0.0079 [-0.0352, +0.0045]; 0.858 | -0.0225 [-0.0273, -0.0177]; 1.000 | -0.0500 [-0.0526, -0.0473]; 1.000 |
+| conformal_size_lgbm - vpa_percentile | -- | -- | -- | -0.0367 [-0.0443, -0.0285]; 1.000 | -0.0611 [-0.0698, -0.0533]; 1.000 | -0.0775 [-0.0832, -0.0704]; 1.000 | -- |
+| vpa_updater - vpa_percentile | -0.0107 [-0.0176, -0.0007]; 0.990 | -- | -- | -- | -- | -- | -- |
+| vpa_updater - ico_margin | -0.1574 [-0.2460, -0.1113]; 1.000 | -- | -- | -- | -- | -- | -- |
+| vpa_updater - fixed_headroom | -0.1812 [-0.3113, -0.0679]; 1.000 | -- | -- | -- | -- | -- | -- |

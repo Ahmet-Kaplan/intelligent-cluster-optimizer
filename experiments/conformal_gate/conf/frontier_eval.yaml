@@ -1,0 +1,20 @@
+prepared_dir: outputs/prepared_alibaba
+sim:
+  step_s: 60
+  warmup_steps: 1440
+  every_steps: 60
+skip_decisions: 24                         # common start at hour 48 (same decisions as the panel)
+seeds: [0, 1, 2, 3, 4]                     # a container is taken from the first seed that leaves it uninjected
+eval_from: 99                              # drop decisions before every eps >= 0.01 is calibrated (cold start)
+padding_n: [6, 12, 24, 48, 96, 168]                    # error-padding window (decisions)
+paired_refs: [vpa_percentile, vpa_updater]             # paired slack differences at matched violation
+ico_delta: [0.0, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0, 1.5]   # Eq. (margin) sweep
+vpa_percentile: [50, 75, 90, 95, 99, 99.9]             # VPA target percentile sweep (margin 1.15)
+headroom_factor: [1.0, 1.1, 1.25, 1.5, 2.0]           # P95(all history) x factor
+eps: [0.01, 0.02, 0.05, 0.1, 0.2]                      # static conformal for eps < 0.05, ACI otherwise
+forecasts:                                             # name: [forecast dir, variant]
+  lgbm: [outputs/forecasts_baselines, lgbm]
+  chronos2: [outputs/forecasts, univariate]
+  toto2_313m: [outputs/forecasts_toto2_313m, toto2_313m]
+targets: [0.002, 0.005, 0.01, 0.02, 0.05]              # matched violation levels
+out_dir: outputs/frontier_r4

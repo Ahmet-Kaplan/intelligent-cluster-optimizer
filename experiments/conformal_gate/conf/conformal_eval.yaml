@@ -1,0 +1,15 @@
+prepared_dir: outputs/prepared_alibaba
+forecast_dir: outputs/forecasts
+seeds: [0, 1, 2, 3, 4]
+sim:
+  step_s: 60
+  warmup_steps: 1440
+  every_steps: 60
+tau0: 0.9                       # forecaster quantile used for the envelope U_k
+window: 168                     # calibration scores (7 days hourly)
+eps: [0.01, 0.05, 0.1]          # risk budgets eps_c
+eta: [0.0, 0.005]               # 0 = static split conformal (ablation), 0.005 = ACI
+variants: [univariate, covariate]
+modes: [size, modify, veto]     # size = B4 (BACC-like, no veto); modify / veto = proposed gate P
+skip_decisions: 0              # 24 = common start at hour 48 for all forecasters
+out_dir: outputs/conformal

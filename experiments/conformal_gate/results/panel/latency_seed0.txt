@@ -1,0 +1,5 @@
+toto2_4m seed 0: 300 containers, 300 new series, 47338 forecasts, 40.2 s (0.85 ms/forecast incl. I/O)
+toto2_22m seed 0: 300 containers, 300 new series, 47338 forecasts, 58.9 s (1.25 ms/forecast incl. I/O)
+toto2_313m seed 0: 300 containers, 300 new series, 47338 forecasts, 308.5 s (6.52 ms/forecast incl. I/O)
+timesfm3 seed 0: 300 containers, 300 new series, 47338 forecasts, 1075.0 s (22.71 ms/forecast incl. I/O)
+chronos2 seed 0: 300 containers, 600 new forecasts, 619.0 s [2 variants => ~94k forecasts]

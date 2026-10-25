@@ -1,0 +1,10 @@
+prepared_dir: outputs/prepared_alibaba
+seeds: [0, 1, 2, 3, 4]
+sim:
+  step_s: 60
+  warmup_steps: 1440
+  every_steps: 60
+leak:
+  machine_mem_gb: 64.0   # assumption (Alibaba normalizes memory); OLS slope threshold is non-binding >= 8 GB
+leak_windows_h: [2, 6, 24]   # OLS detector window sweep (plan: window sets B3 recall)
+out_dir: outputs/baselines

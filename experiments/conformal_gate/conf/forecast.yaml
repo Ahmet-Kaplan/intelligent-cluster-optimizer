@@ -1,0 +1,17 @@
+prepared_dir: outputs/prepared_alibaba
+seeds: [0, 1, 2, 3, 4]
+sim:
+  step_s: 60
+  warmup_steps: 1440
+  every_steps: 60          # = forecast horizon H
+model: chronos2            # chronos2 | toto2_<4m|22m|313m|1b|2.5b> | timesfm3
+model_id: amazon/chronos-2  # zero-shot; the paper's fine-tuned checkpoint is not used here
+device: cuda
+context: 2048
+batch_size: 256
+variants: [univariate, covariate]   # covariate = CPU as past covariate (load conditioning)
+limit_containers: null     # set for a quick benchmark
+out_dir: outputs/forecasts
+hw_season: 24               # Go DefaultConfig: hourly data, daily season
+hw_out_dir: outputs/forecasts_hw
+baseline_out_dir: outputs/forecasts_baselines

@@ -1,0 +1,19 @@
+prepared_dir: outputs/prepared_alibaba
+seeds: [0, 1, 2, 3, 4]
+sim:
+  step_s: 60
+  warmup_steps: 1440
+  every_steps: 60
+lambdas: [0.001, 0.01, 0.05, 0.1, 0.2]   # false-alarm budgets (Ville bound per container)
+residual_sources:                        # name: [forecast dir, variant]
+  chronos2: [outputs/forecasts, univariate]
+  chronos2_cov: [outputs/forecasts, covariate]
+  toto2_22m: [outputs/forecasts_toto2_22m, toto2_22m]
+  lgbm: [outputs/forecasts_baselines, lgbm]
+thin_hours: [1, 6, 12, 24]              # block-mean thinning (decorrelation) for thin_scores
+thin_scores: [seasonal_diff, frozen_profile, resid_lgbm]
+ols_r2: [0.5, 0.6, 0.7, 0.8, 0.9]       # ICO detector threshold sweep (Go default 0.7)
+ols_window_h: 6
+machine_mem_gb: 64.0
+theta_rep: 0                            # p-value randomization replicate (0 = published run)
+out_dir: outputs/leak_eval

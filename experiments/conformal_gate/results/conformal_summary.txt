@@ -1,0 +1,40 @@
+# Source: voximul:~/ico-experiments/conformal_gate/outputs/conformal/per_container.csv
+# Code: e0e6fbb; Chronos-2 zero-shot (amazon/chronos-2, chronos-forecasting 2.3.2), context 2048, H=60, tau0=0.9, window 168
+# Data: Alibaba v2018 memory, 300 containers (296 uninjected in >=1 seed), seeds 0-4. Generated 2026-10-16T21:13Z
+## Conformal policies on healthy, uninjected containers (mean [95% CI over containers])
+covariate/0.01/0.0/modify          n=296 slack 0.1779 [0.1763, 0.1795]  violation 0.0023 [0.0014, 0.0034]  bound-miss 0.0085 [0.0070, 0.0101]  cold 0.624
+covariate/0.01/0.0/size            n=296 slack 0.1367 [0.1331, 0.1403]  violation 0.0051 [0.0041, 0.0062]  bound-miss 0.0085 [0.0070, 0.0101]  cold 0.624
+covariate/0.01/0.0/veto            n=296 slack 0.1754 [0.1726, 0.1780]  violation 0.0076 [0.0038, 0.0121]  bound-miss 0.0085 [0.0070, 0.0101]  cold 0.624
+covariate/0.01/0.005/modify        n=296 slack 0.1792 [0.1775, 0.1808]  violation 0.0024 [0.0014, 0.0036]  bound-miss 0.0151 [0.0116, 0.0191]  cold 0.624
+covariate/0.01/0.005/size          n=296 slack 0.1427 [0.1390, 0.1462]  violation 0.0048 [0.0037, 0.0059]  bound-miss 0.0151 [0.0116, 0.0191]  cold 0.624
+covariate/0.01/0.005/veto          n=296 slack 0.1785 [0.1762, 0.1809]  violation 0.0047 [0.0021, 0.0078]  bound-miss 0.0151 [0.0116, 0.0191]  cold 0.624
+covariate/0.05/0.0/modify          n=296 slack 0.1764 [0.1752, 0.1776]  violation 0.0019 [0.0013, 0.0026]  bound-miss 0.0463 [0.0434, 0.0494]  cold 0.134
+covariate/0.05/0.0/size            n=296 slack 0.0565 [0.0528, 0.0603]  violation 0.0408 [0.0383, 0.0436]  bound-miss 0.0463 [0.0434, 0.0494]  cold 0.134
+covariate/0.05/0.0/veto            n=296 slack 0.1731 [0.1691, 0.1759]  violation 0.0072 [0.0036, 0.0117]  bound-miss 0.0463 [0.0434, 0.0494]  cold 0.134
+covariate/0.05/0.005/modify        n=296 slack 0.1763 [0.1752, 0.1774]  violation 0.0020 [0.0013, 0.0028]  bound-miss 0.0460 [0.0440, 0.0480]  cold 0.134
+covariate/0.05/0.005/size          n=296 slack 0.0561 [0.0524, 0.0597]  violation 0.0406 [0.0388, 0.0424]  bound-miss 0.0460 [0.0440, 0.0480]  cold 0.134
+covariate/0.05/0.005/veto          n=296 slack 0.1744 [0.1728, 0.1760]  violation 0.0058 [0.0032, 0.0087]  bound-miss 0.0460 [0.0440, 0.0480]  cold 0.134
+covariate/0.1/0.0/modify           n=296 slack 0.1755 [0.1747, 0.1764]  violation 0.0020 [0.0013, 0.0028]  bound-miss 0.1008 [0.0960, 0.1059]  cold 0.063
+covariate/0.1/0.0/size             n=296 slack 0.0376 [0.0350, 0.0402]  violation 0.0948 [0.0903, 0.0996]  bound-miss 0.1008 [0.0960, 0.1059]  cold 0.063
+covariate/0.1/0.0/veto             n=296 slack 0.1740 [0.1717, 0.1758]  violation 0.0044 [0.0022, 0.0070]  bound-miss 0.1008 [0.0960, 0.1059]  cold 0.063
+covariate/0.1/0.005/modify         n=296 slack 0.1755 [0.1747, 0.1764]  violation 0.0020 [0.0013, 0.0028]  bound-miss 0.0982 [0.0950, 0.1014]  cold 0.063
+covariate/0.1/0.005/size           n=296 slack 0.0377 [0.0351, 0.0404]  violation 0.0923 [0.0893, 0.0954]  bound-miss 0.0982 [0.0950, 0.1014]  cold 0.063
+covariate/0.1/0.005/veto           n=296 slack 0.1741 [0.1717, 0.1759]  violation 0.0044 [0.0023, 0.0071]  bound-miss 0.0982 [0.0950, 0.1014]  cold 0.063
+univariate/0.01/0.0/modify         n=296 slack 0.1779 [0.1763, 0.1796]  violation 0.0023 [0.0014, 0.0035]  bound-miss 0.0083 [0.0069, 0.0098]  cold 0.624
+univariate/0.01/0.0/size           n=296 slack 0.1367 [0.1331, 0.1404]  violation 0.0050 [0.0040, 0.0062]  bound-miss 0.0083 [0.0069, 0.0098]  cold 0.624
+univariate/0.01/0.0/veto           n=296 slack 0.1755 [0.1727, 0.1782]  violation 0.0076 [0.0037, 0.0121]  bound-miss 0.0083 [0.0069, 0.0098]  cold 0.624
+univariate/0.01/0.005/modify       n=296 slack 0.1793 [0.1776, 0.1810]  violation 0.0026 [0.0015, 0.0038]  bound-miss 0.0142 [0.0109, 0.0180]  cold 0.624
+univariate/0.01/0.005/size         n=296 slack 0.1421 [0.1384, 0.1457]  violation 0.0049 [0.0038, 0.0061]  bound-miss 0.0142 [0.0109, 0.0180]  cold 0.624
+univariate/0.01/0.005/veto         n=296 slack 0.1788 [0.1764, 0.1811]  violation 0.0047 [0.0021, 0.0078]  bound-miss 0.0142 [0.0109, 0.0180]  cold 0.624
+univariate/0.05/0.0/modify         n=296 slack 0.1765 [0.1753, 0.1777]  violation 0.0020 [0.0013, 0.0028]  bound-miss 0.0451 [0.0420, 0.0483]  cold 0.134
+univariate/0.05/0.0/size           n=296 slack 0.0566 [0.0529, 0.0604]  violation 0.0398 [0.0371, 0.0426]  bound-miss 0.0451 [0.0420, 0.0483]  cold 0.134
+univariate/0.05/0.0/veto           n=296 slack 0.1739 [0.1698, 0.1766]  violation 0.0068 [0.0033, 0.0110]  bound-miss 0.0451 [0.0420, 0.0483]  cold 0.134
+univariate/0.05/0.005/modify       n=296 slack 0.1764 [0.1752, 0.1776]  violation 0.0021 [0.0014, 0.0028]  bound-miss 0.0454 [0.0434, 0.0474]  cold 0.134
+univariate/0.05/0.005/size         n=296 slack 0.0562 [0.0526, 0.0600]  violation 0.0401 [0.0383, 0.0418]  bound-miss 0.0454 [0.0434, 0.0474]  cold 0.134
+univariate/0.05/0.005/veto         n=296 slack 0.1750 [0.1738, 0.1763]  violation 0.0056 [0.0031, 0.0084]  bound-miss 0.0454 [0.0434, 0.0474]  cold 0.134
+univariate/0.1/0.0/modify          n=296 slack 0.1756 [0.1747, 0.1764]  violation 0.0021 [0.0013, 0.0030]  bound-miss 0.0982 [0.0936, 0.1031]  cold 0.063
+univariate/0.1/0.0/size            n=296 slack 0.0376 [0.0350, 0.0401]  violation 0.0923 [0.0881, 0.0969]  bound-miss 0.0982 [0.0936, 0.1031]  cold 0.063
+univariate/0.1/0.0/veto            n=296 slack 0.1742 [0.1718, 0.1760]  violation 0.0044 [0.0022, 0.0071]  bound-miss 0.0982 [0.0936, 0.1031]  cold 0.063
+univariate/0.1/0.005/modify        n=296 slack 0.1756 [0.1747, 0.1764]  violation 0.0021 [0.0014, 0.0030]  bound-miss 0.0971 [0.0941, 0.1002]  cold 0.063
+univariate/0.1/0.005/size          n=296 slack 0.0377 [0.0351, 0.0403]  violation 0.0913 [0.0884, 0.0942]  bound-miss 0.0971 [0.0941, 0.1002]  cold 0.063
+univariate/0.1/0.005/veto          n=296 slack 0.1742 [0.1718, 0.1761]  violation 0.0044 [0.0022, 0.0072]  bound-miss 0.0971 [0.0941, 0.1002]  cold 0.063

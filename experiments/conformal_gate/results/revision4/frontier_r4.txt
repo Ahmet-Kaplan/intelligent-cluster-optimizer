@@ -1,0 +1,129 @@
+<!-- Source: voximul:~/ico-experiments/conformal_gate/outputs/frontier_r4.txt; scripts/run_revision4.sh at code c586e91; generated 2026-10-24T00:45+03 -->
+[2026-10-24 00:43:25,016][__main__][INFO] - 296 containers, 79 policies
+296 containers, 40 evaluated decisions per container on average
+## Policy points (mean over containers; median slack; resizes per container-day)
+| conformal_modify_chronos2 | 0.01 | slack 0.1833 (median 0.1735) | violation 0.0006 | resizes/day 9.74 |
+| conformal_modify_chronos2 | 0.02 | slack 0.1776 (median 0.1733) | violation 0.0008 | resizes/day 9.18 |
+| conformal_modify_chronos2 | 0.05 | slack 0.1759 (median 0.1731) | violation 0.0015 | resizes/day 8.92 |
+| conformal_modify_chronos2 | 0.1 | slack 0.1755 (median 0.1731) | violation 0.0021 | resizes/day 8.79 |
+| conformal_modify_chronos2 | 0.2 | slack 0.1754 (median 0.1731) | violation 0.0024 | resizes/day 8.76 |
+| conformal_modify_lgbm | 0.01 | slack 0.1836 (median 0.1733) | violation 0.0005 | resizes/day 9.66 |
+| conformal_modify_lgbm | 0.02 | slack 0.1778 (median 0.1732) | violation 0.0009 | resizes/day 9.17 |
+| conformal_modify_lgbm | 0.05 | slack 0.1754 (median 0.1731) | violation 0.0019 | resizes/day 8.83 |
+| conformal_modify_lgbm | 0.1 | slack 0.1752 (median 0.1731) | violation 0.0025 | resizes/day 8.77 |
+| conformal_modify_lgbm | 0.2 | slack 0.1750 (median 0.1730) | violation 0.0030 | resizes/day 8.75 |
+| conformal_modify_toto2_313m | 0.01 | slack 0.1933 (median 0.1736) | violation 0.0006 | resizes/day 10.22 |
+| conformal_modify_toto2_313m | 0.02 | slack 0.1781 (median 0.1735) | violation 0.0006 | resizes/day 9.24 |
+| conformal_modify_toto2_313m | 0.05 | slack 0.1760 (median 0.1731) | violation 0.0014 | resizes/day 8.96 |
+| conformal_modify_toto2_313m | 0.1 | slack 0.1754 (median 0.1731) | violation 0.0017 | resizes/day 8.79 |
+| conformal_modify_toto2_313m | 0.2 | slack 0.1753 (median 0.1731) | violation 0.0020 | resizes/day 8.78 |
+| conformal_size_chronos2 | 0.01 | slack 0.0678 (median 0.0393) | violation 0.0086 | resizes/day 22.71 |
+| conformal_size_chronos2 | 0.02 | slack 0.0486 (median 0.0320) | violation 0.0182 | resizes/day 22.72 |
+| conformal_size_chronos2 | 0.05 | slack 0.0356 (median 0.0259) | violation 0.0487 | resizes/day 22.74 |
+| conformal_size_chronos2 | 0.1 | slack 0.0285 (median 0.0215) | violation 0.1032 | resizes/day 22.74 |
+| conformal_size_chronos2 | 0.2 | slack 0.0226 (median 0.0156) | violation 0.1981 | resizes/day 22.76 |
+| conformal_size_lgbm | 0.01 | slack 0.0699 (median 0.0436) | violation 0.0082 | resizes/day 16.26 |
+| conformal_size_lgbm | 0.02 | slack 0.0514 (median 0.0348) | violation 0.0168 | resizes/day 16.25 |
+| conformal_size_lgbm | 0.05 | slack 0.0362 (median 0.0254) | violation 0.0442 | resizes/day 16.35 |
+| conformal_size_lgbm | 0.1 | slack 0.0300 (median 0.0214) | violation 0.0852 | resizes/day 16.32 |
+| conformal_size_lgbm | 0.2 | slack 0.0249 (median 0.0178) | violation 0.1490 | resizes/day 16.45 |
+| conformal_size_toto2_313m | 0.01 | slack 0.0770 (median 0.0420) | violation 0.0087 | resizes/day 22.57 |
+| conformal_size_toto2_313m | 0.02 | slack 0.0440 (median 0.0334) | violation 0.0169 | resizes/day 22.59 |
+| conformal_size_toto2_313m | 0.05 | slack 0.0283 (median 0.0248) | violation 0.0492 | resizes/day 22.60 |
+| conformal_size_toto2_313m | 0.1 | slack 0.0195 (median 0.0181) | violation 0.1024 | resizes/day 22.61 |
+| conformal_size_toto2_313m | 0.2 | slack 0.0158 (median 0.0151) | violation 0.1995 | resizes/day 22.64 |
+| error_padding_candidate | 6 | slack 0.1760 (median 0.1732) | violation 0.0031 | resizes/day 8.78 |
+| error_padding_candidate | 12 | slack 0.1774 (median 0.1733) | violation 0.0031 | resizes/day 8.78 |
+| error_padding_candidate | 24 | slack 0.1805 (median 0.1733) | violation 0.0020 | resizes/day 8.76 |
+| error_padding_candidate | 48 | slack 0.1833 (median 0.1733) | violation 0.0018 | resizes/day 8.75 |
+| error_padding_candidate | 96 | slack 0.1855 (median 0.1736) | violation 0.0014 | resizes/day 8.74 |
+| error_padding_candidate | 168 | slack 0.1863 (median 0.1736) | violation 0.0012 | resizes/day 8.73 |
+| error_padding_chronos2 | 6 | slack 0.0305 (median 0.0224) | violation 0.0869 | resizes/day 22.75 |
+| error_padding_chronos2 | 12 | slack 0.0374 (median 0.0270) | violation 0.0586 | resizes/day 22.74 |
+| error_padding_chronos2 | 24 | slack 0.0474 (median 0.0315) | violation 0.0303 | resizes/day 22.73 |
+| error_padding_chronos2 | 48 | slack 0.0570 (median 0.0332) | violation 0.0167 | resizes/day 22.73 |
+| error_padding_chronos2 | 96 | slack 0.0645 (median 0.0368) | violation 0.0097 | resizes/day 22.72 |
+| error_padding_chronos2 | 168 | slack 0.0676 (median 0.0392) | violation 0.0080 | resizes/day 22.72 |
+| error_padding_lgbm | 6 | slack 0.0341 (median 0.0247) | violation 0.0678 | resizes/day 16.36 |
+| error_padding_lgbm | 12 | slack 0.0402 (median 0.0268) | violation 0.0502 | resizes/day 16.35 |
+| error_padding_lgbm | 24 | slack 0.0500 (median 0.0314) | violation 0.0275 | resizes/day 16.33 |
+| error_padding_lgbm | 48 | slack 0.0593 (median 0.0361) | violation 0.0160 | resizes/day 16.32 |
+| error_padding_lgbm | 96 | slack 0.0664 (median 0.0407) | violation 0.0091 | resizes/day 16.30 |
+| error_padding_lgbm | 168 | slack 0.0698 (median 0.0436) | violation 0.0082 | resizes/day 16.25 |
+| error_padding_toto2_313m | 6 | slack 0.0240 (median 0.0215) | violation 0.0694 | resizes/day 22.63 |
+| error_padding_toto2_313m | 12 | slack 0.0316 (median 0.0254) | violation 0.0500 | resizes/day 22.60 |
+| error_padding_toto2_313m | 24 | slack 0.0427 (median 0.0295) | violation 0.0277 | resizes/day 22.60 |
+| error_padding_toto2_313m | 48 | slack 0.0560 (median 0.0346) | violation 0.0157 | resizes/day 22.59 |
+| error_padding_toto2_313m | 96 | slack 0.0688 (median 0.0400) | violation 0.0096 | resizes/day 22.59 |
+| error_padding_toto2_313m | 168 | slack 0.0773 (median 0.0420) | violation 0.0082 | resizes/day 22.58 |
+| fixed_headroom | 1 | slack 0.0938 (median 0.0462) | violation 0.0793 | resizes/day 0.36 |
+| fixed_headroom | 1.1 | slack 0.1762 (median 0.1329) | violation 0.0073 | resizes/day 0.36 |
+| fixed_headroom | 1.25 | slack 0.2751 (median 0.2370) | violation 0.0013 | resizes/day 0.36 |
+| fixed_headroom | 1.5 | slack 0.3959 (median 0.3641) | violation 0.0008 | resizes/day 0.36 |
+| fixed_headroom | 2 | slack 0.5469 (median 0.5231) | violation 0.0000 | resizes/day 0.36 |
+| ico_margin | 0 | slack 0.0095 (median 0.0076) | violation 0.2813 | resizes/day 8.73 |
+| ico_margin | 0.1 | slack 0.0995 (median 0.0979) | violation 0.0124 | resizes/day 8.73 |
+| ico_margin | 0.2 | slack 0.1746 (median 0.1730) | violation 0.0042 | resizes/day 8.73 |
+| ico_margin | 0.3 | slack 0.2381 (median 0.2366) | violation 0.0022 | resizes/day 8.73 |
+| ico_margin | 0.5 | slack 0.3396 (median 0.3384) | violation 0.0007 | resizes/day 8.73 |
+| ico_margin | 0.75 | slack 0.4340 (median 0.4329) | violation 0.0003 | resizes/day 8.73 |
+| ico_margin | 1 | slack 0.5047 (median 0.5038) | violation 0.0000 | resizes/day 8.73 |
+| ico_margin | 1.5 | slack 0.6038 (median 0.6031) | violation 0.0000 | resizes/day 8.73 |
+| vpa_percentile | 50 | slack 0.1366 (median 0.1325) | violation 0.0388 | resizes/day 2.42 |
+| vpa_percentile | 75 | slack 0.1658 (median 0.1418) | violation 0.0103 | resizes/day 1.78 |
+| vpa_percentile | 90 | slack 0.1828 (median 0.1508) | violation 0.0032 | resizes/day 1.19 |
+| vpa_percentile | 95 | slack 0.1931 (median 0.1605) | violation 0.0009 | resizes/day 1.08 |
+| vpa_percentile | 99 | slack 0.2116 (median 0.1777) | violation 0.0004 | resizes/day 0.63 |
+| vpa_percentile | 99.9 | slack 0.2232 (median 0.1843) | violation 0.0002 | resizes/day 0.35 |
+| vpa_updater | 50 | slack 0.1913 (median 0.1736) | violation 0.0006 | resizes/day 0.77 |
+| vpa_updater | 75 | slack 0.2022 (median 0.1762) | violation 0.0003 | resizes/day 0.48 |
+| vpa_updater | 90 | slack 0.2138 (median 0.1850) | violation 0.0002 | resizes/day 0.34 |
+| vpa_updater | 95 | slack 0.2211 (median 0.1851) | violation 0.0002 | resizes/day 0.26 |
+| vpa_updater | 99 | slack 0.2291 (median 0.1869) | violation 0.0002 | resizes/day 0.21 |
+| vpa_updater | 99.9 | slack 0.2316 (median 0.1950) | violation 0.0001 | resizes/day 0.10 |
+
+## Slack at matched violation (interpolated; mean [95% bootstrap CI over containers]); -- = out of range
+| family | viol=0.002 | viol=0.005 | viol=0.01 | viol=0.02 | viol=0.05 |
+|---|---|---|---|---|---|
+| conformal_modify_chronos2 | 0.1756 [0.1747, 0.1779] | -- | -- | -- | -- |
+| conformal_modify_lgbm | 0.1754 [0.1744, 0.1783] | -- | -- | -- | -- |
+| conformal_modify_toto2_313m | -- | -- | -- | -- | -- |
+| conformal_size_chronos2 | -- | -- | 0.0650 [0.0562, 0.0738] | 0.0478 [0.0424, 0.0544] | 0.0354 [0.0315, 0.0399] |
+| conformal_size_lgbm | -- | -- | 0.0661 [0.0576, 0.0754] | 0.0496 [0.0437, 0.0562] | 0.0353 [0.0312, 0.0399] |
+| conformal_size_toto2_313m | -- | -- | 0.0720 [0.0563, 0.0861] | 0.0425 [0.0310, 0.0516] | 0.0282 [0.0175, 0.0361] |
+| error_padding_candidate | 0.1804 [0.1760, 0.1889] | -- | -- | -- | -- |
+| error_padding_chronos2 | -- | -- | 0.0641 [0.0563, 0.0737] | 0.0547 [0.0479, 0.0625] | 0.0404 [0.0356, 0.0460] |
+| error_padding_lgbm | -- | -- | 0.0655 [0.0572, 0.0750] | 0.0560 [0.0487, 0.0642] | 0.0403 [0.0352, 0.0460] |
+| error_padding_toto2_313m | -- | -- | 0.0681 [0.0538, 0.0824] | 0.0512 [0.0390, 0.0620] | 0.0316 [0.0205, 0.0401] |
+| fixed_headroom | 0.2636 [0.2130, 0.4365] | 0.2137 [0.1683, 0.2530] | 0.1731 [0.1592, 0.2002] | 0.1616 [0.1466, 0.1757] | 0.1273 [0.1073, 0.1437] |
+| ico_margin | 0.2538 [0.1737, 0.3095] | 0.1673 [0.1312, 0.2122] | 0.1212 [0.0982, 0.1533] | 0.0970 [0.0949, 0.0993] | 0.0869 [0.0843, 0.0896] |
+| vpa_percentile | 0.1882 [0.1771, 0.1984] | 0.1785 [0.1668, 0.1888] | 0.1665 [0.1580, 0.1785] | 0.1559 [0.1461, 0.1651] | -- |
+| vpa_updater | -- | -- | -- | -- | -- |
+
+## Paired difference in slack at matched violation, family - reference (mean [95% paired bootstrap CI]; share of resamples < 0)
+| conformal_modify_chronos2 - vpa_percentile | -0.0126 [-0.0225, -0.0035]; 0.997 | -- | -- | -- | -- |
+| conformal_modify_lgbm - vpa_percentile | -0.0128 [-0.0222, -0.0034]; 0.995 | -- | -- | -- | -- |
+| conformal_modify_toto2_313m - vpa_percentile | -- | -- | -- | -- | -- |
+| conformal_size_chronos2 - vpa_percentile | -- | -- | -0.1016 [-0.1122, -0.0934]; 1.000 | -0.1081 [-0.1156, -0.0997]; 1.000 | -- |
+| conformal_size_lgbm - vpa_percentile | -- | -- | -0.1004 [-0.1113, -0.0917]; 1.000 | -0.1063 [-0.1133, -0.0986]; 1.000 | -- |
+| conformal_size_toto2_313m - vpa_percentile | -- | -- | -0.0946 [-0.1111, -0.0818]; 1.000 | -0.1134 [-0.1254, -0.1030]; 1.000 | -- |
+| error_padding_candidate - vpa_percentile | -0.0078 [-0.0153, +0.0024]; 0.916 | -- | -- | -- | -- |
+| error_padding_chronos2 - vpa_percentile | -- | -- | -0.1024 [-0.1125, -0.0939]; 1.000 | -0.1012 [-0.1085, -0.0931]; 1.000 | -- |
+| error_padding_lgbm - vpa_percentile | -- | -- | -0.1011 [-0.1111, -0.0931]; 1.000 | -0.0999 [-0.1069, -0.0923]; 1.000 | -- |
+| error_padding_toto2_313m - vpa_percentile | -- | -- | -0.0985 [-0.1137, -0.0854]; 1.000 | -0.1046 [-0.1172, -0.0941]; 1.000 | -- |
+| fixed_headroom - vpa_percentile | +0.0755 [+0.0326, +0.2478]; 0.002 | +0.0352 [-0.0043, +0.0714]; 0.065 | +0.0065 [-0.0028, +0.0283]; 0.099 | +0.0057 [-0.0044, +0.0153]; 0.116 | -- |
+| ico_margin - vpa_percentile | +0.0657 [-0.0052, +0.1187]; 0.038 | -0.0112 [-0.0407, +0.0325]; 0.776 | -0.0454 [-0.0694, -0.0183]; 1.000 | -0.0589 [-0.0665, -0.0504]; 1.000 | -- |
+| vpa_updater - vpa_percentile | -- | -- | -- | -- | -- |
+| conformal_modify_chronos2 - vpa_updater | -- | -- | -- | -- | -- |
+| conformal_modify_lgbm - vpa_updater | -- | -- | -- | -- | -- |
+| conformal_modify_toto2_313m - vpa_updater | -- | -- | -- | -- | -- |
+| conformal_size_chronos2 - vpa_updater | -- | -- | -- | -- | -- |
+| conformal_size_lgbm - vpa_updater | -- | -- | -- | -- | -- |
+| conformal_size_toto2_313m - vpa_updater | -- | -- | -- | -- | -- |
+| error_padding_candidate - vpa_updater | -- | -- | -- | -- | -- |
+| error_padding_chronos2 - vpa_updater | -- | -- | -- | -- | -- |
+| error_padding_lgbm - vpa_updater | -- | -- | -- | -- | -- |
+| error_padding_toto2_313m - vpa_updater | -- | -- | -- | -- | -- |
+| fixed_headroom - vpa_updater | -- | -- | -- | -- | -- |
+| ico_margin - vpa_updater | -- | -- | -- | -- | -- |
+| vpa_percentile - vpa_updater | -- | -- | -- | -- | -- |
