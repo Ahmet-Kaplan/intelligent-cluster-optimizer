@@ -55,3 +55,5 @@ The v1 run (deploy/experiments/gke-ab) had five design flaws found in review:
     here, so this is an independent replication with its own calibrated window.
   - Hours between 07:45Z and 11:12Z are excluded.
   Exposure differences across arms caused by the outage are reported.
+- 2026-10-25, same note: the run is extended by 24 h (teardown 2026-10-27T21:51Z) so that segment 2 has about 39
+  calibrated hours.
