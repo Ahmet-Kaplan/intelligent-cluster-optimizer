@@ -1,6 +1,7 @@
 package apiserver_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -359,10 +360,30 @@ func TestIDUniqueness(t *testing.T) {
 	q := apiserver.NewDryRunQueue()
 	ids := make(map[string]bool)
 	for i := 0; i < 100; i++ {
-		id := q.Add(apiserver.DryRunDecision{DeploymentName: "web"})
+		id := q.Add(apiserver.DryRunDecision{DeploymentName: "web", ContainerName: fmt.Sprintf("c%d", i)})
 		if ids[id] {
 			t.Fatalf("duplicate ID generated: %s", id)
 		}
 		ids[id] = true
+	}
+}
+
+func TestDryRunQueue_RepeatReplacesPendingDecision(t *testing.T) {
+	q := apiserver.NewDryRunQueue()
+	first := q.Add(apiserver.DryRunDecision{Namespace: "ns", DeploymentName: "web", ContainerName: "app", ScalingType: "vertical", RecommendedMemory: "100Mi"})
+	again := q.Add(apiserver.DryRunDecision{Namespace: "ns", DeploymentName: "web", ContainerName: "app", ScalingType: "vertical", RecommendedMemory: "120Mi"})
+	other := q.Add(apiserver.DryRunDecision{Namespace: "ns", DeploymentName: "web", ContainerName: "sidecar", ScalingType: "vertical"})
+	if again != first || other == first {
+		t.Fatalf("ids %q %q %q: repeat must reuse the pending entry, another container must not", first, again, other)
+	}
+	if got := q.GetPending(); len(got) != 2 {
+		t.Fatalf("%d pending decisions, want 2", len(got))
+	}
+	if d, _ := q.Get(first); d.RecommendedMemory != "120Mi" {
+		t.Fatalf("pending decision not updated: %+v", d)
+	}
+	q.Approve(first)
+	if id := q.Add(apiserver.DryRunDecision{Namespace: "ns", DeploymentName: "web", ContainerName: "app", ScalingType: "vertical"}); id == first {
+		t.Fatal("a reviewed decision must not be reused")
 	}
 }

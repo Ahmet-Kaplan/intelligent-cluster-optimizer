@@ -151,9 +151,9 @@ func (c *ForecastCache) Set(ns, deploy string, entry ForecastEntry) {
 		return v
 	}
 	for i := range entry.Points {
-		entry.Points[i].Low    = clamp(entry.Points[i].Low)
+		entry.Points[i].Low = clamp(entry.Points[i].Low)
 		entry.Points[i].Median = clamp(entry.Points[i].Median)
-		entry.Points[i].High   = clamp(entry.Points[i].High)
+		entry.Points[i].High = clamp(entry.Points[i].High)
 	}
 	key := ns + "/" + deploy
 	c.mu.Lock()
@@ -244,6 +244,16 @@ func (q *DryRunQueue) Add(d DryRunDecision) string {
 	cooldownKey := d.Namespace + "/" + d.DeploymentName + "/" + d.ContainerName
 	if t, ok := q.lastApproved[cooldownKey]; ok && time.Since(t) < approveCooldown {
 		return ""
+	}
+	// One pending decision per workload container: a repeat (one per reconcile) replaces it in place,
+	// so the queue cannot grow while a decision waits for review.
+	for id, old := range q.decisions {
+		if old.Status == DryRunPending && old.Namespace == d.Namespace && old.DeploymentName == d.DeploymentName &&
+			old.ContainerName == d.ContainerName && old.ScalingType == d.ScalingType {
+			d.ID, d.CreatedAt = id, old.CreatedAt
+			q.decisions[id] = &d
+			return id
+		}
 	}
 	q.decisions[d.ID] = &d
 	return d.ID

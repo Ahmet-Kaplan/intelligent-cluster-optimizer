@@ -35,18 +35,19 @@ import (
 )
 
 var (
-	kubeconfig    string
-	namespace     string
-	workers       int
-	leaseLockName string
-	leaseLockNS   string
-	leaderElect   bool
-	leaseDuration time.Duration
-	renewDeadline time.Duration
-	retryPeriod   time.Duration
-	mlServiceURL  string
-	apiAddr       string
-	healthAddr    string
+	kubeconfig       string
+	namespace        string
+	workers          int
+	leaseLockName    string
+	leaseLockNS      string
+	leaderElect      bool
+	leaseDuration    time.Duration
+	renewDeadline    time.Duration
+	retryPeriod      time.Duration
+	mlServiceURL     string
+	apiAddr          string
+	healthAddr       string
+	metricsRetention time.Duration
 )
 
 // ready is set to 1 once the controller has successfully started.
@@ -106,6 +107,8 @@ func main() {
 		"Address for the GUI REST API server (e.g. :8090). Set to empty string to disable.")
 	flag.StringVar(&healthAddr, "health-addr", ":8081",
 		"Address for the Kubernetes health probe server (/healthz and /readyz).")
+	flag.DurationVar(&metricsRetention, "metrics-retention", 24*time.Hour,
+		"How long pod metrics are kept in memory; older samples, including those of deleted pods, are dropped.")
 	flag.Parse()
 
 	if err := v1alpha1.AddToScheme(scheme.Scheme); err != nil {
@@ -205,6 +208,11 @@ func main() {
 	} else {
 		klog.Info("Restored latest backup successfully")
 	}
+	// Bound the metrics store: drop restored samples past the retention window, then expire samples
+	// continuously. Without this the store, and the backup restored at start-up, grow without limit.
+	store := reconciler.GetMetricsStorage()
+	klog.Infof("[GC] Dropped %d expired metric entries after restore", store.Cleanup(metricsRetention))
+	store.StartGarbageCollector(ctx, 5*time.Minute, metricsRetention)
 	if err := backupMgr.Start(); err != nil {
 		klog.Warningf("Backup manager failed to start (non-fatal): %v", err)
 	} else {
