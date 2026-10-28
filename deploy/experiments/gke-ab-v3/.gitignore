@@ -1,3 +1,4 @@
 out/
 started_at
 out-*.log
+.chain.sh

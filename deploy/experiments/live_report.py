@@ -24,7 +24,7 @@ MIB = 2**20
 SCORED = re.compile(r'key="([^"]+)" at="([^"]+)" peak=(\S+) upper=(\S+) bound=(.+?) alpha=(\S+)$')
 
 
-def series(path: Path, memory_type: str | None = None) -> dict:
+def series(path: Path, memory_type: str | None = None, until: str = "9") -> dict:
     """{(namespace, workload): {minute: value}} and {(namespace, workload): set(pod names)}."""
     d, pods = collections.defaultdict(dict), collections.defaultdict(set)
     for s in json.load(open(path)):
@@ -32,9 +32,11 @@ def series(path: Path, memory_type: str | None = None) -> dict:
             continue
         r = s["resource"]["labels"]
         key = (r["namespace_name"], r["pod_name"].rsplit("-", 2)[0])
-        pods[key].add(r["pod_name"])
         for p in s["points"]:
             t = p["interval"]["endTime"][:16]
+            if t >= until:
+                continue
+            pods[key].add(r["pod_name"])
             d[key][t] = max(d[key].get(t, 0), int(p["value"]["int64Value"]))
     return d, pods
 
@@ -53,13 +55,13 @@ def hours(used: dict, req: dict) -> dict:
     return out
 
 
-def gate_log(path: Path | None, gate_ns: str) -> dict:
+def gate_log(path: Path | None, gate_ns: str, until: str = "9") -> dict:
     if path is None:
         return {}
     rows = {}
     for e in json.load(open(path)):
         m = SCORED.search(e.get("jsonPayload", {}).get("message", ""))
-        if m and m[1].startswith(gate_ns + "/"):
+        if m and m[1].startswith(gate_ns + "/") and m[2] < until:
             rows[(m[1], m[2])] = m.groups()
     return rows
 
@@ -107,15 +109,16 @@ def main() -> None:
     ap.add_argument("others", nargs="+")
     ap.add_argument("--gate-log")
     ap.add_argument("--vetoes")
+    ap.add_argument("--until", default="9", help="drop data at or after this UTC time, e.g. 2026-10-25T07:45")
     a = ap.parse_args()
     out = Path(a.out)
     arms = [a.gate_ns, *a.others]
-    used, _ = series(out / "memory_used_bytes.json", "non-evictable")
-    req, pods = series(out / "memory_request_bytes.json")
+    used, _ = series(out / "memory_used_bytes.json", "non-evictable", a.until)
+    req, pods = series(out / "memory_request_bytes.json", until=a.until)
     hrs = hours(used, req)
     first = min(min(h) for h in hrs.values())
     run_start = f"{first[:11]}{int(first[11:13]) + 1:02d}"
-    rows = gate_log(Path(a.gate_log) if a.gate_log else None, a.gate_ns)
+    rows = gate_log(Path(a.gate_log) if a.gate_log else None, a.gate_ns, a.until)
     calib = {}  # first full hour after the workload's first calibrated decision
     for r in rows.values():
         if bound(r[4]) is not None:
@@ -182,7 +185,8 @@ def main() -> None:
         per_ctr = collections.Counter(r[0] for r, _ in cal)
         print(f"\n## Gate log: scored {len(rows)}, calibrated {len(cal)}, bound misses {miss} ({miss / max(len(cal), 1):.4f}); "
               f"median bound slack over peak {np.median([(b - float(r[2])) / float(r[2]) for r, b in fin]):.3f}; "
-              f"bound above 1 GiB limit {sum(b > 2**30 for _, b in fin)}; bound below candidate "
+              f"uncertified (raise above the 1 GiB limit, capped; RiskBudgetUncertified events are not in the exported log) "
+              f"{sum(b > 2**30 and b > float(r[3]) for r, b in fin)}; bound below candidate "
               f"{sum(b < float(r[3]) for r, b in fin)}; calibrated decisions per container "
               f"{min(per_ctr.values())}-{max(per_ctr.values())}")
 
