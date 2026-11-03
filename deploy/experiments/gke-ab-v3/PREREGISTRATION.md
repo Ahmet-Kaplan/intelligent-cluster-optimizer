@@ -46,3 +46,10 @@ the confirmatory run.
 
 ## Changes after launch
 (none)
+
+Added 2026-10-30, after the analysis:
+- **Run length:** data collection ended about 3.8 h late, so the analysis has 74 hourly bins per workload rather than
+  72. Cutting the data at 72 h does not change the conclusion (Holm-adjusted p 0.082 instead of 0.081).
+- **Outcome (f):** RiskBudgetUncertified events were lost. Kubernetes events expired (1 h TTL) and the `run.sh collect`
+  log filter did not keep the capping line. The count is reconstructed from scored decisions (finite bound above the
+  1 GiB limit and above the candidate).

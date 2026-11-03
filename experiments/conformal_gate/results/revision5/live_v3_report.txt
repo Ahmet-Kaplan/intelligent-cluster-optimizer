@@ -1,0 +1,80 @@
+
+## whole run: per-workload hours exceeded / hours (mean request MiB)
+| workload | ab-gate | ab-nogate | ab-margin | ab-vpa |
+|---|---|---|---|---|
+| cycle-1h-s1 | 0/74 (538) | 0/74 (546) | 0/74 (751) | 0/74 (524) |
+| cycle-1h-s2 | 0/74 (538) | 0/74 (546) | 0/74 (751) | 0/74 (524) |
+| cycle-1h-s3 | 0/74 (600) | 0/74 (546) | 0/74 (751) | 0/74 (524) |
+| cycle-6h-s1 | 0/74 (583) | 0/74 (606) | 0/74 (834) | 0/74 (582) |
+| cycle-6h-s2 | 0/74 (629) | 1/74 (595) | 0/74 (819) | 0/74 (579) |
+| cycle-6h-s3 | 0/74 (638) | 2/74 (599) | 1/74 (823) | 0/74 (580) |
+| leak-reset-s1 | 6/74 (715) | 3/74 (695) | 0/74 (956) | 1/74 (691) |
+| leak-reset-s2 | 7/74 (691) | 1/74 (701) | 0/74 (963) | 2/74 (694) |
+| leak-reset-s3 | 7/74 (666) | 0/74 (703) | 0/74 (967) | 1/74 (697) |
+| noisy-s1 | 0/74 (517) | 0/74 (514) | 0/74 (719) | 0/74 (517) |
+| noisy-s2 | 0/74 (547) | 0/74 (531) | 0/74 (732) | 0/74 (522) |
+| noisy-s3 | 0/74 (525) | 0/74 (528) | 0/74 (728) | 0/74 (521) |
+| regime-s1 | 0/74 (586) | 0/74 (546) | 0/74 (751) | 0/74 (524) |
+| regime-s2 | 0/74 (538) | 0/74 (546) | 0/74 (751) | 0/74 (524) |
+| regime-s3 | 0/74 (538) | 0/74 (546) | 0/74 (751) | 0/74 (524) |
+| spike-s1 | 8/74 (861) | 5/74 (657) | 4/74 (906) | 1/74 (683) |
+| spike-s2 | 9/74 (744) | 0/74 (727) | 0/74 (1000) | 0/74 (698) |
+| spike-s3 | 9/74 (804) | 2/74 (706) | 1/74 (974) | 0/74 (698) |
+| steady-s1 | 0/74 (400) | 0/74 (365) | 0/74 (503) | 0/74 (374) |
+| steady-s2 | 0/74 (400) | 0/74 (365) | 0/74 (503) | 0/74 (374) |
+| steady-s3 | 0/74 (400) | 0/74 (365) | 0/74 (503) | 0/74 (374) |
+| **total** | 46/1554 = 0.030 (593) | 14/1554 = 0.009 (568) | 6/1554 = 0.004 (783) | 5/1554 = 0.003 (559) |
+
+Workload-level, ab-gate minus other arm (per-workload exceedance rate): mean diff [95% bootstrap CI over workloads], Wilcoxon p, Holm p, workloads lower/higher
+- vs ab-vpa: +0.0264 [+0.0090, +0.0463], p = 0.0269, Holm p = 0.0806, 0 lower / 6 higher of 21
+- vs ab-margin: +0.0257 [+0.0084, +0.0457], p = 0.0277, Holm p = 0.0806, 1 lower / 6 higher of 21
+- vs ab-nogate: +0.0206 [+0.0045, +0.0393], p = 0.0352, Holm p = 0.0806, 2 lower / 6 higher of 21
+
+Replayed trailing-24 h-max rules on the gate arm's usage (hours exceeded / hours, mean request MiB):
+- max(24 h) x 1.0: 85/1554 = 0.055, mean request 479
+- max(24 h) x 1.15: 15/1554 = 0.010, mean request 551
+
+## calibrated window: per-workload hours exceeded / hours (mean request MiB)
+| workload | ab-gate | ab-nogate | ab-margin | ab-vpa |
+|---|---|---|---|---|
+| cycle-1h-s1 | 0/56 (546) | 0/56 (546) | 0/56 (751) | 0/56 (524) |
+| cycle-1h-s2 | 0/56 (546) | 0/56 (546) | 0/56 (751) | 0/56 (524) |
+| cycle-1h-s3 | 0/56 (628) | 0/56 (546) | 0/56 (751) | 0/56 (524) |
+| cycle-6h-s1 | 0/56 (606) | 0/56 (606) | 0/56 (834) | 0/56 (582) |
+| cycle-6h-s2 | 0/56 (666) | 0/56 (606) | 0/56 (834) | 0/56 (582) |
+| cycle-6h-s3 | 0/56 (678) | 0/56 (606) | 0/56 (834) | 0/56 (582) |
+| leak-reset-s1 | 0/56 (779) | 0/56 (703) | 0/56 (967) | 0/56 (698) |
+| leak-reset-s2 | 0/56 (748) | 0/56 (703) | 0/56 (966) | 0/56 (698) |
+| leak-reset-s3 | 0/56 (715) | 0/56 (703) | 0/56 (966) | 0/56 (698) |
+| noisy-s1 | 0/56 (518) | 0/56 (514) | 0/56 (721) | 0/56 (519) |
+| noisy-s2 | 0/56 (558) | 0/56 (534) | 0/56 (736) | 0/56 (524) |
+| noisy-s3 | 0/56 (529) | 0/56 (528) | 0/56 (728) | 0/56 (522) |
+| regime-s1 | 0/56 (610) | 0/56 (546) | 0/56 (751) | 0/56 (524) |
+| regime-s2 | 0/56 (546) | 0/56 (546) | 0/56 (751) | 0/56 (524) |
+| regime-s3 | 0/56 (546) | 0/56 (546) | 0/56 (751) | 0/56 (524) |
+| spike-s1 | 0/56 (971) | 0/56 (727) | 0/56 (1000) | 0/56 (698) |
+| spike-s2 | 0/56 (817) | 0/56 (727) | 0/56 (1000) | 0/56 (698) |
+| spike-s3 | 0/56 (897) | 0/56 (727) | 0/56 (1000) | 0/56 (698) |
+| steady-s1 | 0/56 (365) | 0/56 (365) | 0/56 (503) | 0/56 (351) |
+| steady-s2 | 0/56 (365) | 0/56 (365) | 0/56 (503) | 0/56 (351) |
+| steady-s3 | 0/56 (365) | 0/56 (365) | 0/56 (503) | 0/56 (351) |
+| **total** | 0/1176 = 0.000 (619) | 0/1176 = 0.000 (574) | 0/1176 = 0.000 (791) | 0/1176 = 0.000 (557) |
+
+Workload-level, ab-gate minus other arm (per-workload exceedance rate): mean diff [95% bootstrap CI over workloads], Wilcoxon p, Holm p, workloads lower/higher
+- vs ab-nogate: +0.0000 [+0.0000, +0.0000], p = 1, Holm p = 1, 0 lower / 0 higher of 21
+- vs ab-margin: +0.0000 [+0.0000, +0.0000], p = 1, Holm p = 1, 0 lower / 0 higher of 21
+- vs ab-vpa: +0.0000 [+0.0000, +0.0000], p = 1, Holm p = 1, 0 lower / 0 higher of 21
+
+Replayed trailing-24 h-max rules on the gate arm's usage (hours exceeded / hours, mean request MiB):
+- max(24 h) x 1.0: 34/1176 = 0.029, mean request 484
+- max(24 h) x 1.15: 0/1176 = 0.000, mean request 556
+
+## Operations per arm (whole run)
+| arm | pods created | request changes | minutes over request | mean overrun MiB (when over) |
+|---|---|---|---|---|
+| ab-gate | 639 | 58 | 920/95485 = 0.0096 | 66 |
+| ab-nogate | 684 | 107 | 109/95484 = 0.0011 | 186 |
+| ab-margin | 778 | 121 | 64/95482 = 0.0007 | 223 |
+| ab-vpa | 50 | 29 | 95/95481 = 0.0010 | 38 |
+
+## Gate log: scored 1554, calibrated 1155, bound misses 34 (0.0294); median bound slack over peak 0.189; uncertified (raise above the 1 GiB limit, capped; RiskBudgetUncertified events are not in the exported log) 95; bound below candidate 827; calibrated decisions per container 55-55
