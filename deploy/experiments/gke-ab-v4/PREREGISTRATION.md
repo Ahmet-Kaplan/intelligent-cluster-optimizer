@@ -57,4 +57,9 @@ hour's minimum request.
   with v3.
 
 ## Changes after launch
-(none)
+- 2026-11-03, about 6 h into the run, before any data was collected: the analysis code for (h) was added to
+  `live_report.py`. It fixes two details the plan left open. The cold-start hours are those from launch + 1 h up to
+  the calibrated window's first hour, so the two windows split the whole run. Raises applied, cuts applied, and
+  reductions queued are counted up to the minute of the workload's first calibrated decision, because that decision
+  can be applied within the same hour. On v3 data the existing sections of the report are unchanged, and the
+  gate arm shows 0 raises and 0 cuts in cold start, as expected.

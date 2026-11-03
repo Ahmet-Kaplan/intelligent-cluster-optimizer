@@ -7,7 +7,8 @@ counts with >= 30 samples; peak = max usage, request = min request in the hour).
 workload: per-workload exceedance rates are compared between the gate arm and each other arm with a paired
 Wilcoxon signed-rank test (Holm over the comparisons) and a bootstrap CI over workloads; hour counts are
 descriptive. Two windows: the whole run (from 1 h after the first sample) and the calibrated window (from the
-first full hour after the gate arm's first calibrated decision for that workload). Replayed rules re-size against the gate arm's usage.
+first full hour after the gate arm's first calibrated decision for that workload). The cold-start window (v4 outcome h) is the whole run minus the
+calibrated window, per workload. Replayed rules re-size against the gate arm's usage.
 """
 
 import argparse
@@ -21,6 +22,7 @@ import numpy as np
 from scipy.stats import wilcoxon
 
 MIB = 2**20
+QUEUED = re.compile(r"Queueing ([\w-]+)/([\w-]+)/[\w-]+ for approval: conformal gate in cold start")
 SCORED = re.compile(r'key="([^"]+)" at="([^"]+)" peak=(\S+) upper=(\S+) bound=(.+?) alpha=(\S+)$')
 
 
@@ -73,24 +75,46 @@ def bound(raw: str) -> float | None:
     return {"+Inf": float("inf"), "-Inf": float("-inf")}.get(b) or float(b)
 
 
-def rate(hrs: dict, since: str) -> tuple[int, int, float]:
-    sel = [x for h, x in hrs.items() if h >= since]
+def rate(hrs: dict, since: str, before: str = "9") -> tuple[int, int, float]:
+    sel = [x for h, x in hrs.items() if since <= h < before]
     return len(sel), sum(p > r for p, r, *_ in sel), (statistics.mean(x[2] for x in sel) / MIB if sel else np.nan)
 
 
-def replay(hrs: dict, since: str, factor: float, window_h: int = 24) -> tuple[int, int, float]:
+def replay(hrs: dict, since: str, factor: float, window_h: int = 24, before: str = "9") -> tuple[int, int, float]:
     """Request = trailing max of the last `window_h` hourly peaks x factor, against the same hours' peaks."""
     keys = sorted(hrs)
     n = miss = 0
     reqs = []
     for i, h in enumerate(keys):
         past = [hrs[k][0] for k in keys[max(0, i - window_h):i]]
-        if h < since or not past:
+        if not since <= h < before or not past:
             continue
         r = max(past) * factor
         n, miss = n + 1, miss + (hrs[h][0] > r)
         reqs.append(r / MIB)
     return n, miss, (statistics.mean(reqs) if reqs else np.nan)
+
+
+def cold_start_actions(log: Path, gate_ns: str, req: dict, calib: dict, until: str) -> None:
+    """v4 outcome (h): gate-arm request raises and cuts applied before the workload's first calibrated decision
+    (`calib` maps workload -> its minute; from the request series) and reductions queued for approval (controller
+    log lines, one per reconcile)."""
+    queued = collections.Counter()
+    for e in json.load(open(log)):
+        m = QUEUED.search(e.get("jsonPayload", {}).get("message", ""))
+        if m and m[1] == gate_ns and e.get("timestamp", "")[:16] < min(until, calib.get(m[2], "9")):
+            queued[m[2]] += 1
+    print("\n## Cold start, gate arm: request changes before the first calibrated decision, reductions queued")
+    print("| workload | first calibrated decision | raises applied | cuts applied | queued (log lines) |")
+    print("|---|---|---|---|---|")
+    tot = [0, 0, 0]
+    for w in sorted(calib):
+        pts = sorted((t, v) for t, v in req.get((gate_ns, w), {}).items() if t < calib[w])
+        up = sum(b > a for (_, a), (_, b) in zip(pts, pts[1:]))
+        down = sum(b < a for (_, a), (_, b) in zip(pts, pts[1:]))
+        tot = [tot[0] + up, tot[1] + down, tot[2] + queued[w]]
+        print(f"| {w} | {calib[w]} | {up} | {down} | {queued[w]} |")
+    print(f"| **total** | | {tot[0]} | {tot[1]} | {tot[2]} |")
 
 
 def compare(a: dict, b: dict) -> str:
@@ -119,15 +143,20 @@ def main() -> None:
     first = min(min(h) for h in hrs.values())
     run_start = f"{first[:11]}{int(first[11:13]) + 1:02d}"
     rows = gate_log(Path(a.gate_log) if a.gate_log else None, a.gate_ns, a.until)
-    calib = {}  # first full hour after the workload's first calibrated decision
+    calib, calib_at = {}, {}  # first full hour after / minute of the workload's first calibrated decision
     for r in rows.values():
         if bound(r[4]) is not None:
             w = r[0].split("/")[2]
+            calib_at[w] = min(calib_at.get(w, r[1][:16]), r[1][:16])
             h = (np.datetime64(r[1][:13]) + np.timedelta64(1, "h")).astype(str)[:13]
             calib[w] = min(calib.get(w, h), h)
     workloads = sorted({w for (ns, w) in hrs if ns == a.gate_ns})
 
-    for label, since in (("whole run", lambda w: run_start), ("calibrated window", lambda w: calib.get(w, "9"))):
+    windows = [("whole run", lambda w: run_start, lambda w: "9"),
+               ("calibrated window", lambda w: calib.get(w, "9"), lambda w: "9")]
+    if calib:
+        windows.append(("cold-start window", lambda w: run_start, lambda w: calib.get(w, "9")))
+    for label, since, before in windows:
         print(f"\n## {label}: per-workload hours exceeded / hours (mean request MiB)")
         print("| workload | " + " | ".join(arms) + " |")
         print("|---|" + "---|" * len(arms))
@@ -136,7 +165,7 @@ def main() -> None:
         for w in workloads:
             cells = []
             for ns in arms:
-                n, m, mr = rate(hrs.get((ns, w), {}), since(w))
+                n, m, mr = rate(hrs.get((ns, w), {}), since(w), before(w))
                 if n:
                     per[ns][w] = m / n
                     tot[ns][0] += n
@@ -160,7 +189,7 @@ def main() -> None:
             n = m = 0
             rq = []
             for w in workloads:
-                x = replay(hrs.get((a.gate_ns, w), {}), since(w), f)
+                x = replay(hrs.get((a.gate_ns, w), {}), since(w), f, before=before(w))
                 n, m = n + x[0], m + x[1]
                 rq.append(x[2])
             print(f"- max(24 h) x {f}: {m}/{n} = {m / max(n, 1):.3f}, mean request {np.nanmean(rq):.0f}")
@@ -189,6 +218,9 @@ def main() -> None:
               f"{sum(b > 2**30 and b > float(r[3]) for r, b in fin)}; bound below candidate "
               f"{sum(b < float(r[3]) for r, b in fin)}; calibrated decisions per container "
               f"{min(per_ctr.values())}-{max(per_ctr.values())}")
+
+    if calib:
+        cold_start_actions(Path(a.gate_log), a.gate_ns, req, calib_at, a.until)
 
     if a.vetoes:
         c = collections.Counter()
