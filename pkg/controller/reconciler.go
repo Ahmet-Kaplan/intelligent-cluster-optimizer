@@ -744,8 +744,9 @@ func (r *Reconciler) processRecommendations(ctx context.Context, config *optimiz
 				}
 			}
 
-			// Cold start: no calibrated verdict yet, so a live change waits for human approval.
-			if coldStart && !config.Spec.DryRun {
+			// Cold start: no calibrated verdict yet, so a live memory reduction waits for human approval.
+			// A raise only adds headroom and goes through, so an under-sized container is not stuck at its request.
+			if coldStartNeedsApproval(coldStart, containerRec.RecommendedMemory, containerRec.CurrentMemory) && !config.Spec.DryRun {
 				klog.V(3).Infof("[LIVE] Queueing %s/%s/%s for approval: conformal gate in cold start",
 					rec.Namespace, rec.WorkloadName, rec.ContainerName)
 				if r.dryRunQueue != nil {

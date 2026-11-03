@@ -43,6 +43,23 @@ func TestMemoryRiskBudget(t *testing.T) {
 	}
 }
 
+func TestColdStartHoldsOnlyReductions(t *testing.T) {
+	for _, c := range []struct {
+		cold         bool
+		rec, current int64
+		want         bool
+	}{
+		{true, 400, 512, true},   // reduction waits
+		{true, 700, 512, false},  // raise goes through
+		{true, 512, 512, false},  // no memory change
+		{false, 400, 512, false}, // calibrated: the gate decides
+	} {
+		if got := coldStartNeedsApproval(c.cold, c.rec<<20, c.current<<20); got != c.want {
+			t.Errorf("cold=%v rec=%d cur=%d: got %v want %v", c.cold, c.rec, c.current, got, c.want)
+		}
+	}
+}
+
 // The gate over real storage: the first decision is a cold start, the second raises a candidate
 // that the first horizon's realized peak exceeded.
 func TestAdmissionGateRaisesUnderSizedCandidate(t *testing.T) {

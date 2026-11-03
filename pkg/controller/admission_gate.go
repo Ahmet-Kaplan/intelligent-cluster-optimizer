@@ -16,6 +16,12 @@ func memoryRiskBudget(config *optimizerv1alpha1.OptimizerConfig) float64 {
 	return config.Spec.Recommendations.MemoryRiskBudget
 }
 
+// coldStartNeedsApproval reports whether a cold-start decision must wait for a human: only a memory
+// reduction does, since a raise cannot make an exceedance more likely.
+func coldStartNeedsApproval(coldStart bool, recommended, current int64) bool {
+	return coldStart && recommended < current
+}
+
 // workloadContainerPeak returns the realized next-horizon target of the gate: the peak memory of one
 // container across all pods of a workload, since every replica shares the container's request.
 func workloadContainerPeak(store *storage.InMemoryStorage, namespace, workload, container string) conformal.PeakFunc {
