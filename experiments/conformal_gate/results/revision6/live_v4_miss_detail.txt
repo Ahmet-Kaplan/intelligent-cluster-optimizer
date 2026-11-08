@@ -1,0 +1,15 @@
+scored 1491 calibrated 1092 misses 20
+misses with bound < candidate: 19
+misses with bound >= candidate: 1
+misses with peak > candidate: 2
+containers 21 over eps 0.05: 3 over 2eps: 0
+with zero misses: 11
+ab-gate/Deployment/steady-s3/mem 3/52 = 0.058
+ab-gate/Deployment/steady-s1/mem 3/52 = 0.058
+ab-gate/Deployment/regime-s1/mem 3/52 = 0.058
+ab-gate/Deployment/steady-s2/mem 2/52 = 0.038
+ab-gate/Deployment/spike-s3/mem 2/52 = 0.038
+ab-gate/Deployment/leak-reset-s1/mem 2/52 = 0.038
+ab-gate/Deployment/cycle-1h-s3/mem 2/52 = 0.038
+ab-gate/Deployment/noisy-s3/mem 1/52 = 0.019
+calibration scores per container (calibrated decisions) min/max: 52 52
