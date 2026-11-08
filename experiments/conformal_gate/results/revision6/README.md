@@ -16,11 +16,11 @@ Notes:
 - (f) counted directly as pre-registered: 11,980 gate-arm capping lines, each following a same-container
   "Risk budget ... raised" line with the same value within 60 s; 0 capping lines without such a raise. All on
   spike-s1..s3. The controller logs one pair per reconcile, so the line count is per reconcile, not per decision;
-  the per-decision count from the scored log (report, "uncertified") is 108 of 1491 scored decisions.
+  the per-decision count from the scored log (report, "uncertified") is 108 of 1092 calibrated decisions (a finite bound is needed).
 - (g) controller: 0 restarts, one pod; non-evictable memory hourly max median 270 MiB, max 352 MiB.
 - Pods created (report, operations): gate 1158 vs nogate 769, margin 757, vpa 49.
 - `live_v4_miss_detail.txt`: `../revision5/miss_detail.py` on v4. 20/1092 misses; bound below candidate in 19;
-  peak above candidate in 2 (spike-s3, 2026-11-05T10-11: admitted request 245 MiB, the only large gate overruns);
+  peak above candidate in 2 (consistent with spike-s3, 2026-11-05T10-11, admitted 245 MiB; mapping not checked);
   3 of 21 containers above eps (0.058 each), none above 2 eps; 52 calibrated decisions per container.
 - `live_v4_overrun.txt` (`overrun_v4.py`, descriptive, NOT pre-registered): size of each calibrated-window
   exceedance. Gate: 11 of 13 are +116..+156 KiB over a 606 MiB request, 2 are +361 MiB over 245 MiB. No gate:
