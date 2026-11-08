@@ -1,0 +1,4 @@
+(f) uncertified (capping line after same-container raise, <60 s, same value): 11980; other capping lines: 0
+    per workload: {'spike-s1': 4904, 'spike-s2': 3516, 'spike-s3': 3560}
+(g) controller non-evictable hourly max MiB: min 18, median 270, max 352, last 274 over 73 h
+(g) controller restart_count max: 0; controller pods: 1
